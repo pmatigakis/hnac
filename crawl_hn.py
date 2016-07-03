@@ -7,7 +7,9 @@ from hnac.models import Base
 from hnac.crawlers import Crawler
 from hnac.sources import HackernewsStories
 from hnac.processors import SQLAlchemyStorage
- 
+
+import settings
+
 logger = logging.getLogger()
 handler = logging.StreamHandler()
 
@@ -18,7 +20,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-engine = create_engine("mysql://root:root@localhost/hnac?charset=utf8")
+engine = create_engine(settings.CONNECTION_STRING)
 
 Base.metadata.create_all(engine)
 

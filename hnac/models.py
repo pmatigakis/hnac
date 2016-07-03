@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, BigInteger
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -7,13 +7,13 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 
-class HackernewsUser(Base):
-    __tablename__ = "hackernews_users"
+class User(Base):
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     username = Column(String(40), unique=True, nullable=False)
 
-    stories = relationship("HackernewsStory", back_populates="user")
+    stories = relationship("Story", back_populates="user")
 
 
 class Domain(Base):
@@ -33,20 +33,22 @@ class Url(Base):
     url = Column(String(512), unique=True, nullable=False)
 
     domain = relationship("Domain", back_populates="urls")
-    hackernews_stories = relationship("HackernewsStory", back_populates="url")
+    stories = relationship("Story", back_populates="url")
 
-class HackernewsStory(Base):
-    __tablename__ = "hackernews_stories"
+
+class Story(Base):
+    __tablename__ = "stories"
 
     id = Column(Integer, primary_key=True)
     title = Column(String(100), nullable=False)
     url_id = Column(ForeignKey("urls.id"), nullable=False)
-    user_id = Column(ForeignKey("hackernews_users.id"), nullable=False)
+    user_id = Column(ForeignKey("users.id"), nullable=False)
     score = Column(Integer, nullable=False)
     comment_count = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=False), nullable=False)
     added_at = Column(DateTime(timezone=False), nullable=False)
     updated_at = Column(DateTime(timezone=False))
+    created_at_timestamp = Column(BigInteger, nullable=False, index=True)
 
-    user = relationship("HackernewsUser", back_populates="stories")
-    url = relationship("Url", back_populates="hackernews_stories")
+    user = relationship("User", back_populates="stories")
+    url = relationship("Url", back_populates="stories")

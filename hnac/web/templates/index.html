@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hackernews crawler</title>
+</head>
+<body>
+    <h1>Hackernews crawler</h1>
+
+    <p>Total stories: {{ story_count }}</p>
+    
+    <h3>Latest stories</h3>
+
+    <div>
+        {% for story in latest_stories %}
+            <div>{{ story.title }}</div>
+            <div><a href="{{ story.url.url }}">{{ story.url.url }}</a></div>
+            <div><a href="https://news.ycombinator.com/user?id={{ story.user.username }}">{{ story.user.username }}</a> |
+                 score {{ story.score }} |
+                 <a href="https://news.ycombinator.com/item?id={{ story.id }}">comments {{ story.comment_count }}</a> |
+                 {{ story.created_at.isoformat() }}</div>
+            <br />
+        {% endfor %}
+    </div>
+</body>
+</html>
