@@ -6,6 +6,7 @@ from hnac.web.apis.arguments import story_list_query_parser
 from hnac.queries.stories import fetch_stories
 from hnac.web.apis.models import brief_story, story as story_model
 
+
 api = Namespace("stories")
 api.models[brief_story.name] = brief_story
 api.models[story_model.name] = story_model
@@ -27,6 +28,7 @@ class LatestStories(Resource):
 
         return stories
 
+
 @api.route("/<int:story_id>")
 class StoryDetails(Resource):
     @api.marshal_with(story_model)
@@ -45,5 +47,5 @@ class StoryDetails(Resource):
             "score": story.score,
             "comment_count": story.comment_count
         }
-        
+
         return story_details

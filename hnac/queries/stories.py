@@ -21,7 +21,9 @@ def fetch_stories(session, limit=500, offset=0):
 
 
 def get_or_insert_domain(session, domain):
-    domain_object = session.query(Domain).filter_by(domain=domain).one_or_none()
+    domain_object = session.query(Domain)\
+                           .filter_by(domain=domain)\
+                           .one_or_none()
 
     if domain_object:
         return domain_object
@@ -42,7 +44,9 @@ def get_or_insert_domain(session, domain):
 
 
 def get_or_insert_user(session, username):
-    user_object = session.query(User).filter_by(username=username).one_or_none()
+    user_object = session.query(User)\
+                         .filter_by(username=username)\
+                         .one_or_none()
 
     if user_object:
         return user_object
@@ -106,7 +110,7 @@ def save_story(session, story_data):
         created_at=created_at.replace(tzinfo=None),
         added_at=datetime.utcnow().replace(tzinfo=None),
         created_at_timestamp=story_data["time"]
-    )        
+    )
 
     session.add(story_object)
 
@@ -118,6 +122,7 @@ def save_story(session, story_data):
         raise
 
     return story_object
+
 
 def update_story(session, story, story_data):
     logger.debug("updating story %d", story.id)

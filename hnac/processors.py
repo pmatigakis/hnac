@@ -1,6 +1,11 @@
+from abc import ABCMeta, abstractmethod
 import logging
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+
 from hnac.queries.stories import save_or_update_story
+from hnac.models import Base
 
 
 logger = logging.getLogger(__name__)
@@ -21,16 +26,48 @@ def is_story_item(item_data):
     return True
 
 
-class SQLAlchemyStorage(object):
-    def __init__(self, session):
-        self._session = session
+class Processor(object):
+    __metaclass__ = ABCMeta
 
-    def process_item(self, item_data):
-        if not is_story_item(item_data):
+    @abstractmethod
+    def process_item(self, source, item):
+        pass
+
+    def configure(self, config):
+        pass
+
+    def job_started(self, job):
+        pass
+
+    def job_finished(self, job):
+        pass
+
+
+class SQLAlchemyStorage(Processor):
+    def __init__(self):
+        super(SQLAlchemyStorage, self).__init__()
+
+    def configure(self, config):
+        self._db = config.get("SQLAlchemyProcessor", "db")
+
+        logger.debug("db connection string %s", self._db)
+
+    def job_started(self, job):
+        engine = create_engine(self._db)
+
+        Base.metadata.create_all(engine)
+
+        self._session = scoped_session(sessionmaker(bind=engine))
+
+    def job_finished(self, job):
+        self._session.remove()
+
+    def process_item(self, source, item):
+        if not is_story_item(item):
             logger.debug("item is not a story object")
             return
 
         try:
-            save_or_update_story(self._session, item_data)
+            save_or_update_story(self._session, item)
         except:
-            logger.error("failed to save or update story %d", item_data["id"])
+            logger.error("failed to save or update story %d", item["id"])

@@ -1,40 +1,31 @@
-import logging
+import logging 
+from ConfigParser import ConfigParser
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from hnac.jobs import HackernewsStoryDownloader
 
-from hnac.models import Base
-from hnac.crawlers import Crawler
-from hnac.sources import HackernewsStories
-from hnac.processors import SQLAlchemyStorage
 
-import settings
+config = ConfigParser()
+
+config.read("hnac.ini")
+
+log_format = '%(asctime)s %(name)s %(levelname)s %(message)s' 
+
+formatter = logging.Formatter(log_format)
 
 logger = logging.getLogger()
-handler = logging.StreamHandler()
 
-formatter = logging.Formatter(
-    '%(asctime)s %(name)s %(levelname)s %(message)s')
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+console_handler.setLevel(logging.DEBUG)
 
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+file_handler = logging.FileHandler("hnac.log")
+file_handler.setFormatter(formatter)
+file_handler.setLevel(logging.DEBUG)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 logger.setLevel(logging.DEBUG)
 
-engine = create_engine(settings.CONNECTION_STRING)
+job = HackernewsStoryDownloader(config)
 
-Base.metadata.create_all(engine)
-
-Session = sessionmaker(bind=engine)
-
-session = Session()
-
-processor = SQLAlchemyStorage(session)
-
-source = HackernewsStories()
-
-crawler = Crawler(source, processor)
-
-try:
-    crawler.run()
-finally:
-    session.close()
+job.run()

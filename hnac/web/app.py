@@ -5,8 +5,11 @@ from hnac.web import SessionMaker, session
 from hnac.web.apis.api_v1 import blueprint as api_v1
 from hnac.web.views import frontend
 
-def create_app(settings):
-    engine = create_engine(settings.CONNECTION_STRING)
+
+def create_app(config):
+    db = config.get("SQLAlchemyProcessor", "db")
+
+    engine = create_engine(db)
 
     SessionMaker.configure(bind=engine)
 

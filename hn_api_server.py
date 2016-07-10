@@ -1,7 +1,11 @@
 from hnac.web.app import create_app
 
-import settings
+from ConfigParser import ConfigParser
 
-app = create_app(settings)
+config = ConfigParser()
+
+config.read("hnac.ini")
+
+app = create_app(config)
 
 app.run()
