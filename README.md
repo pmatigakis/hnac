@@ -22,3 +22,7 @@ Open the *hnac.ini* file and adjust the settings
 Start the crawler
 
     hnac_start_crawler
+
+Start the API server
+
+    hnac_start_api_server
