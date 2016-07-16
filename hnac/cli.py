@@ -34,6 +34,7 @@ def start_crawler():
 
     job.run()
 
+
 def start_api_server():
     if not path.exists("hnac.ini"):
         print("File hnac.ini doesn't exist")
