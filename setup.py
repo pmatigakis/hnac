@@ -28,6 +28,13 @@ setup(
             'hnac_create_configuration=hnac.cli:create_configuration_file',
             'hnac_start_crawler=hnac.cli:start_crawler',
             'hnac_start_api_server=hnac.cli:start_api_server'
-        ],
+        ]
+    },
+      
+    zip_safe=False,
+
+    include_package_data=True,
+    package_data={
+      'hnac': ['web/templates/*.html'],
     }
 )
