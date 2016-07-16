@@ -4,10 +4,11 @@ from flask import Flask
 from hnac.web import SessionMaker, session
 from hnac.web.apis.api_v1 import blueprint as api_v1
 from hnac.web.views import frontend
+from hnac.configuration import HNAC_DB_SECTION, HNAC_DB
 
 
 def create_app(config):
-    db = config.get("SQLAlchemyProcessor", "db")
+    db = config.get(HNAC_DB_SECTION, HNAC_DB)
 
     engine = create_engine(db)
 

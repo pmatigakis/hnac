@@ -2,3 +2,6 @@
 .pydevproject
 *.pyc
 *.log
+hnac.ini
+*.db
+hnac.egg-info

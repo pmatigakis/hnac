@@ -83,7 +83,8 @@ class HackernewsStories(Source):
         while True:
             try:
                 return self._firebase.get("/v0/newstories", None)
-            except RequestException:
+            except RequestException as e:
+                print e
                 logger.exception("Failed to fetch new story ids")
 
                 failure_count += 1

@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 from hnac.queries.stories import save_or_update_story
 from hnac.models import Base
+from hnac.configuration import HNAC_DB_SECTION, HNAC_DB
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +49,7 @@ class SQLAlchemyStorage(Processor):
         super(SQLAlchemyStorage, self).__init__()
 
     def configure(self, config):
-        self._db = config.get("SQLAlchemyProcessor", "db")
+        self._db = config.get(HNAC_DB_SECTION, HNAC_DB)
 
         logger.debug("db connection string %s", self._db)
 
