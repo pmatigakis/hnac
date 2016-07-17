@@ -18,16 +18,18 @@ def create_configuration_file():
 
 
 def start_crawler():
-    if not path.exists("hnac.ini"):
+    configuration_file_path = path.abspath("hnac.ini")
+    
+    if not path.exists(configuration_file_path):
         print("File hnac.ini doesn't exist")
         exit(1)
-    elif not path.isfile("hnac.ini"):
+    elif not path.isfile(configuration_file_path):
         print("hnac.ini is not a file")
         exit(1)
 
     config = create_configuration()
 
-    with open("hnac.ini", "r") as f:
+    with open(configuration_file_path, "r") as f:
         config.readfp(f)
 
     job = create_hackernews_api_crawler_job(config)
@@ -36,16 +38,18 @@ def start_crawler():
 
 
 def start_api_server():
-    if not path.exists("hnac.ini"):
+    configuration_file_path = path.abspath("hnac.ini")
+
+    if not path.exists(configuration_file_path):
         print("File hnac.ini doesn't exist")
         exit(1)
-    elif not path.isfile("hnac.ini"):
+    elif not path.isfile(configuration_file_path):
         print("hnac.ini is not a file")
         exit(1)
 
     config = create_configuration()
 
-    with open("hnac.ini", "r") as f:
+    with open(configuration_file_path, "r") as f:
         config.readfp(f)
 
     app = create_app(config)
