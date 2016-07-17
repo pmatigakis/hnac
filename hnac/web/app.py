@@ -56,10 +56,6 @@ def create_app(config):
 
     engine = create_engine(db)
 
-    app.logger.debug("this is a debug message")
-    app.logger.error("this is a error message")
-    app.logger.info("this is a info message")
-
     SessionMaker.configure(bind=engine)
 
     @app.teardown_appcontext
