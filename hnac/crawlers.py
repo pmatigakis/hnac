@@ -8,7 +8,7 @@ from hnac.configuration import (HNAC_CRAWLER_SECTION,
                                 HNAC_CRAWLER_DEBUG,
                                 HNAC_CRAWLER_LOG_FILE_SIZE,
                                 HNAC_CRAWLER_LOG_FILE_COUNT,
-                                DEFAULT_LOG_FILENAME)
+                                DEFAULT_CRAWLER_LOG_FILENAME)
 
 
 def create_hackernews_api_crawler_job(config):
@@ -32,7 +32,7 @@ def create_hackernews_api_crawler_job(config):
         logger.addHandler(console_handler)
 
         log_file = (config.get(HNAC_CRAWLER_SECTION, HNAC_CRAWLER_LOG_FILE)
-                    or DEFAULT_LOG_FILENAME)
+                    or DEFAULT_CRAWLER_LOG_FILENAME)
 
         file_handler = RotatingFileHandler(
             log_file,

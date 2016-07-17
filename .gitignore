@@ -5,3 +5,4 @@
 hnac.ini
 *.db
 hnac.egg-info
+temp/
