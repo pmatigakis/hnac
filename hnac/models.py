@@ -20,23 +20,23 @@ class User(Base):
 
     stories = relationship("Story", back_populates="user")
 
-    @staticmethod
-    def create(session, username):
-        user = User(username=username)
+    @classmethod
+    def create(cls, session, username):
+        user = cls(username=username)
 
         session.add(user)
 
         return user
 
-    @staticmethod
-    def get_by_username(session, username):
-        return session.query(User)\
+    @classmethod
+    def get_by_username(cls, session, username):
+        return session.query(cls)\
                       .filter_by(username=username)\
                       .one_or_none()
 
-    @staticmethod
-    def count(session):
-        return session.query(User).count()
+    @classmethod
+    def count(cls, session):
+        return session.query(cls).count()
 
 
 class Domain(Base):
@@ -47,15 +47,15 @@ class Domain(Base):
 
     urls = relationship("Url", back_populates="domain")
 
-    @staticmethod
-    def get_by_domain_name(session, domain_name):
-        return session.query(Domain)\
+    @classmethod
+    def get_by_domain_name(cls, session, domain_name):
+        return session.query(cls)\
                       .filter_by(domain=domain_name)\
                       .one_or_none()
 
-    @staticmethod
-    def create(session, domain_name):
-        domain_object = Domain(domain=domain_name)
+    @classmethod
+    def create(cls, session, domain_name):
+        domain_object = cls(domain=domain_name)
 
         session.add(domain_object)
 
@@ -72,14 +72,14 @@ class Url(Base):
     domain = relationship("Domain", back_populates="urls")
     stories = relationship("Story", back_populates="url")
 
-    @staticmethod
-    def get_by_url(session, url):
-        return session.query(Url)\
+    @classmethod
+    def get_by_url(cls, session, url):
+        return session.query(cls)\
                       .filter_by(url=url)\
                       .one_or_none()
 
-    @staticmethod
-    def create(session, url):
+    @classmethod
+    def create(cls, session, url):
         parsed_url = urlparse(url)
         domain_name = parsed_url.netloc
 
@@ -88,7 +88,7 @@ class Url(Base):
         if not domain_object:
             domain_object = Domain.create(session, domain_name)
 
-        url_object = Url(url=url, domain=domain_object)
+        url_object = cls(url=url, domain=domain_object)
 
         session.add(url_object)
 
@@ -112,12 +112,12 @@ class Story(Base):
     user = relationship("User", back_populates="stories")
     url = relationship("Url", back_populates="stories")
 
-    @staticmethod
-    def get_by_id(session, story_id):
-        return session.query(Story).filter(Story.id == story_id).one_or_none()
+    @classmethod
+    def get_by_id(cls, session, story_id):
+        return session.query(cls).filter(Story.id == story_id).one_or_none()
 
-    @staticmethod
-    def create_from_dict(session, story_data):
+    @classmethod
+    def create_from_dict(cls, session, story_data):
         user_object = User.get_by_username(session, story_data["by"])
 
         if not user_object:
@@ -130,7 +130,7 @@ class Story(Base):
 
         created_at = datetime.fromtimestamp(story_data["time"], tz=pytz.UTC)
 
-        story_object = Story(
+        story_object = cls(
             id=story_data["id"],
             title=story_data["title"],
             url=url_object,
@@ -146,9 +146,9 @@ class Story(Base):
 
         return story_object
 
-    @staticmethod
-    def update_from_dict(session, story_data):
-        story = Story.get_by_id(session, story_data["id"])
+    @classmethod
+    def update_from_dict(cls, session, story_data):
+        story = cls.get_by_id(session, story_data["id"])
 
         story.score = story_data["score"]
         story.comment_count = story_data["descendants"]
