@@ -48,6 +48,9 @@ class SQLAlchemyStorage(Processor):
     def __init__(self):
         super(SQLAlchemyStorage, self).__init__()
 
+        self._session = None
+        self._db = None
+
     def configure(self, config):
         self._db = config.get(HNAC_DB_SECTION, HNAC_DB)
 
