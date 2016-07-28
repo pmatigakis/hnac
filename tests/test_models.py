@@ -85,6 +85,13 @@ class UserRetrievalTests(TestCase):
         self.assertIsNotNone(user.id)
         self.assertEqual(user.username, self.username_1)
 
+    def test_get_user_that_does_not_exist(self):
+        session = self.Session()
+
+        user = User.get_by_username(session, "unknown_user")
+
+        self.assertIsNone(user)
+
 
 class DomainCreationTests(TestCase):
     def setUp(self):
@@ -146,6 +153,13 @@ class DomainQueryTests(TestCase):
         self.assertIsNotNone(domain_object.id)
         self.assertEqual(domain_object.domain, self.domain_1)
 
+    def test_get_unknown_domain(self):
+        session = self.Session()
+
+        domain = Domain.get_by_domain_name(session, "unknown_domain.com")
+
+        self.assertIsNone(domain)
+
 
 class UrlCreationTests(TestCase):
     def setUp(self):
@@ -206,6 +220,13 @@ class UrlQueryTests(TestCase):
         self.assertIsNotNone(url_object)
         self.assertIsNotNone(url_object.id)
         self.assertEqual(url_object.url, self.url_1)
+
+    def test_get_unknown_url(self):
+        session = self.Session()
+
+        url = Url.get_by_url(session, "www.unknown_url.com")
+
+        self.assertIsNone(url)
 
 
 class StoryCreationTests(TestCase):
@@ -280,6 +301,13 @@ class StoryQueryTests(TestCase):
         self.assertIsNotNone(story.created_at)
         self.assertIsNotNone(story.added_at)
         self.assertIsNone(story.updated_at)
+
+    def test_get_unknown_story(self):
+        session = self.Session()
+
+        story = Story.get_by_id(session, 0)
+
+        self.assertIsNone(story)
 
 
 class StoryUpdateTests(TestCase):
