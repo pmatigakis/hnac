@@ -19,7 +19,7 @@ def create_configuration_file():
 
 def start_crawler():
     configuration_file_path = path.abspath("hnac.ini")
-    
+
     if not path.exists(configuration_file_path):
         print("File hnac.ini doesn't exist")
         exit(1)

@@ -19,7 +19,7 @@ def create_app(config):
 
     if config.get(HNAC_API_SECTION, HNAC_API_ENABLE_LOGGING):
         log_level = logging.INFO
-        
+
         if config.getboolean(HNAC_API_SECTION, HNAC_API_LOG_DEBUG_LEVEL):
             log_level = logging.DEBUG
 

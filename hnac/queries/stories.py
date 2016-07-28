@@ -43,29 +43,6 @@ def get_or_insert_domain(session, domain):
     return domain_object
 
 
-def get_or_insert_user(session, username):
-    user_object = session.query(User)\
-                         .filter_by(username=username)\
-                         .one_or_none()
-
-    if user_object:
-        return user_object
-
-    user_object = User(username=username)
-
-    session.add(user_object)
-
-    try:
-        session.commit()
-    except SQLAlchemyError:
-        logger.exception("failed to add user %s",
-                         username)
-
-        raise
-
-    return user_object
-
-
 def get_or_insert_url(session, url):
     url_object = session.query(Url).filter_by(url=url).one_or_none()
 
@@ -94,7 +71,10 @@ def get_or_insert_url(session, url):
 def save_story(session, story_data):
     logger.debug("inserting story %d", story_data["id"])
 
-    user_object = get_or_insert_user(session, story_data["by"])
+    user_object = User.get_by_username(session, story_data["by"])
+
+    if not user_object:
+        user_object = User.create(session, story_data["by"])
 
     url_object = get_or_insert_url(session, story_data["url"])
 
@@ -114,12 +94,7 @@ def save_story(session, story_data):
 
     session.add(story_object)
 
-    try:
-        session.commit()
-    except SQLAlchemyError:
-        logger.exception("Failed to add story %d",
-                         story_data["id"])
-        raise
+    session.commit()
 
     return story_object
 
@@ -131,13 +106,7 @@ def update_story(session, story, story_data):
     story.comment_count = story_data["descendants"]
     story.updated_at = datetime.utcnow().replace(tzinfo=None)
 
-    try:
-        session.commit()
-    except SQLAlchemyError:
-        logger.exception("Failed to update story %d",
-                         story_data["id"])
-
-        raise
+    session.commit()
 
 
 def save_or_update_story(session, story_data):

@@ -24,6 +24,7 @@ HNAC_API_LOG_DEBUG_LEVEL = "log_debug_level"
 HNAC_API_LOG_FILE_SIZE = "filesize"
 HNAC_API_LOG_FILE_COUNT = "file_count"
 
+
 def create_configuration():
     config = ConfigParser()
 

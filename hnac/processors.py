@@ -3,9 +3,9 @@ import logging
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.exc import SQLAlchemyError
 
-from hnac.queries.stories import save_or_update_story
-from hnac.models import Base
+from hnac.models import Base, Story
 from hnac.configuration import HNAC_DB_SECTION, HNAC_DB
 
 
@@ -68,7 +68,20 @@ class SQLAlchemyStorage(Processor):
             logger.debug("item is not a story object")
             return
 
+        story = Story.get_by_id(self._session, item["id"])
+
+        if not story:
+            story = Story.create_from_dict(self._session, item)
+        else:
+            story = Story.update_from_dict(self._session, item)
+
         try:
-            save_or_update_story(self._session, item)
-        except:
+            self._session.commit()
+        except SQLAlchemyError:
             logger.error("failed to save or update story %d", item["id"])
+
+            self._session.rollback()
+
+            return
+
+        return story
