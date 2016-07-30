@@ -2,7 +2,6 @@ from unittest import TestCase, main
 from ConfigParser import ConfigParser
 
 from hnac.processors import SQLAlchemyStorage
-from hnac.configuration import HNAC_DB_SECTION, HNAC_DB
 from hnac.models import Story
 from hnac.schemas import HackernewsStorySchema
 
@@ -11,9 +10,8 @@ from mock_data import story_1_data
 
 class SQLAlchemyStorageTests(TestCase):
     def setUp(self):
-        self.config = ConfigParser()
-        self.config.add_section(HNAC_DB_SECTION)
-        self.config.set(HNAC_DB_SECTION, HNAC_DB, "sqlite:///:memory:")
+        self.config = {}
+        self.config["HNAC_DB"] = "sqlite:///:memory:"
 
     def test_process_item(self):
         processor = SQLAlchemyStorage()
@@ -45,9 +43,8 @@ class SQLAlchemyStorageTests(TestCase):
 
 class SQLAlchemyStorageItemUpdateTests(TestCase):
     def setUp(self):
-        self.config = ConfigParser()
-        self.config.add_section(HNAC_DB_SECTION)
-        self.config.set(HNAC_DB_SECTION, HNAC_DB, "sqlite:///:memory:")
+        self.config = {}
+        self.config["HNAC_DB"] = "sqlite:///:memory:"
 
     def test_process_item(self):
         processor = SQLAlchemyStorage()

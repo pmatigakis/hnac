@@ -1,36 +1,36 @@
+import types
+import os
 from os import path
 
-from hnac.configuration import (create_configuration,
-                                HNAC_API_SECTION,
-                                HNAC_API_HOST,
-                                HNAC_API_PORT,
-                                HNAC_API_DEBUG)
+from sqlalchemy import create_engine
 
 from hnac.crawlers import create_hackernews_api_crawler_job
 from hnac.web.app import create_app
-
-
-def create_configuration_file():
-    config = create_configuration()
-
-    with open("hnac.ini", "w") as f:
-        config.write(f)
+from hnac.models import Base
+from hnac.configuration import default
 
 
 def start_crawler():
-    configuration_file_path = path.abspath("hnac.ini")
+    configuration_file_path = path.abspath("settings.py")
 
     if not path.exists(configuration_file_path):
-        print("File hnac.ini doesn't exist")
+        print("File settings.py doesn't exist")
         exit(1)
     elif not path.isfile(configuration_file_path):
-        print("hnac.ini is not a file")
+        print("settings.py is not a file")
         exit(1)
 
-    config = create_configuration()
+    config = default.__dict__.copy()
 
-    with open(configuration_file_path, "r") as f:
-        config.readfp(f)
+    d = types.ModuleType('settings')
+    d.__file__ = configuration_file_path
+
+    with open(configuration_file_path) as config_file:
+        exec(compile(config_file.read(), configuration_file_path, 'exec'),
+             d.__dict__)
+
+    for item in d.__dict__:
+        config[item] = d.__dict__[item]
 
     job = create_hackernews_api_crawler_job(config)
 
@@ -38,24 +38,46 @@ def start_crawler():
 
 
 def start_api_server():
-    configuration_file_path = path.abspath("hnac.ini")
+    configuration_file_path = path.abspath("settings.py")
 
     if not path.exists(configuration_file_path):
-        print("File hnac.ini doesn't exist")
+        print("File settings.py doesn't exist")
         exit(1)
     elif not path.isfile(configuration_file_path):
-        print("hnac.ini is not a file")
+        print("settings.py is not a file")
         exit(1)
 
-    config = create_configuration()
+    environment = os.environ.get("HNAC_API_ENVIRONMENT", "production")
 
-    with open(configuration_file_path, "r") as f:
-        config.readfp(f)
+    app = create_app(environment, configuration_file_path)
 
-    app = create_app(config)
+    host = app.config["HNAC_API_HOST"]
+    port = app.config["HNAC_API_PORT"]
 
-    host = config.get(HNAC_API_SECTION, HNAC_API_HOST)
-    port = config.getint(HNAC_API_SECTION, HNAC_API_PORT)
-    debug = config.getboolean(HNAC_API_SECTION, HNAC_API_DEBUG)
+    app.run(host, port)
 
-    app.run(host, port, debug)
+
+def create_database():
+    configuration_file_path = path.abspath("settings.py")
+
+    if not path.exists(configuration_file_path):
+        print("File settings.py doesn't exist")
+        exit(1)
+    elif not path.isfile(configuration_file_path):
+        print("settings.py is not a file")
+        exit(1)
+
+    d = types.ModuleType('settings')
+    d.__file__ = configuration_file_path
+
+    with open(configuration_file_path) as config_file:
+        exec(compile(config_file.read(), configuration_file_path, 'exec'),
+             d.__dict__)
+
+    if "HNAC_DB" not in d.__dict__:
+        print("The settings variable HNAC_DB does't exist")
+        exit(1)
+
+    engine = create_engine(d.HNAC_DB)
+
+    Base.metadata.create_all(engine)

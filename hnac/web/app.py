@@ -6,24 +6,27 @@ from flask import Flask
 from hnac.web import SessionMaker, session
 from hnac.web.apis.api_v1 import blueprint as api_v1
 from hnac.web.views import frontend
-from hnac.configuration import (HNAC_DB_SECTION, HNAC_DB, HNAC_API_SECTION,
-                                HNAC_API_ENABLE_LOGGING, HNAC_API_LOG_FILE,
-                                HNAC_API_LOG_DEBUG_LEVEL,
-                                DEFAULT_API_LOG_FILENAME,
-                                HNAC_API_LOG_FILE_SIZE,
-                                HNAC_API_LOG_FILE_COUNT)
 
 
-def create_app(config):
+def create_app(environment="production", settings_module=None):
     app = Flask(__name__)
 
-    if config.get(HNAC_API_SECTION, HNAC_API_ENABLE_LOGGING):
-        log_level = logging.INFO
+    configuration_modules = {
+        "production": "hnac.configuration.production",
+        "development": "hnac.configuration.development",
+        "testing": "hnac.configuration.testing"
+    }
 
-        if config.getboolean(HNAC_API_SECTION, HNAC_API_LOG_DEBUG_LEVEL):
-            log_level = logging.DEBUG
+    app.config.from_object("hnac.configuration.default")
+    app.config.from_object(configuration_modules[environment])
 
-        log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
+    if settings_module:
+        app.config.from_pyfile(settings_module)
+
+    if app.config["HNAC_API_ENABLE_LOGGING"]:
+        log_level = app.config["HNAC_API_LOG_LEVEL"]
+
+        log_format = app.config["HNAC_API_LOG_FORMAT"]
 
         formatter = logging.Formatter(log_format)
 
@@ -33,16 +36,13 @@ def create_app(config):
 
         app.logger.addHandler(console_handler)
 
-        log_file = (config.get(HNAC_API_SECTION, HNAC_API_LOG_FILE)
-                    or DEFAULT_API_LOG_FILENAME)
+        log_file = app.config["HNAC_API_LOG_FILE"]
 
         file_handler = RotatingFileHandler(
             log_file,
             mode="a",
-            maxBytes=config.getint(HNAC_API_SECTION,
-                                   HNAC_API_LOG_FILE_SIZE),
-            backupCount=config.getint(HNAC_API_SECTION,
-                                      HNAC_API_LOG_FILE_COUNT)
+            maxBytes=app.config["HNAC_API_LOG_FILE_SIZE"],
+            backupCount=app.config["HNAC_API_LOG_FILE_COUNT"]
         )
 
         file_handler.setFormatter(formatter)
@@ -52,7 +52,7 @@ def create_app(config):
 
         app.logger.setLevel(log_level)
 
-    db = config.get(HNAC_DB_SECTION, HNAC_DB)
+    db = app.config["HNAC_DB"]
 
     engine = create_engine(db)
 

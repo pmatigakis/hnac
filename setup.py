@@ -27,7 +27,7 @@ setup(
 
     entry_points = {
         'console_scripts': [
-            'hnac_create_configuration=hnac.cli:create_configuration_file',
+            'hnac_create_database=hnac.cli:create_database',
             'hnac_start_crawler=hnac.cli:start_crawler',
             'hnac_start_api_server=hnac.cli:start_api_server'
         ]

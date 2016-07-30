@@ -49,17 +49,14 @@ class HackernewsStories(Source):
         self._story_ids = None
 
     def configure(self, config):
-        if config.has_option("HackernewsStories", "wait_time"):
-            self.wait_time = config.getfloat("HackernewsStories",
-                                             "wait_time")
+        if "HNAC_CRAWLER_WAIT_TIME" in config:
+            self.wait_time = config["HNAC_CRAWLER_WAIT_TIME"]
 
-        if config.has_option("HackernewsStories", "backoff_time"):
-            self.backoff_time = config.getfloat("HackernewsStories",
-                                                "backoff_time")
+        if "HNAC_CRAWLER_BACKOFF_TIME" in config:
+            self.backoff_time = config["HNAC_CRAWLER_BACKOFF_TIME"]
 
-        if config.has_option("HackernewsStories", "abort_after"):
-            self.abort_after = config.getfloat("HackernewsStories",
-                                               "abort_after")
+        if "HNAC_CRAWLER_ABORT_AFTER" in config:
+            self.abort_after = config["HNAC_CRAWLER_ABORT_AFTER"]
 
     def _fetch_item(self, item_id):
         logger.debug("Fetching hackernews item %d", item_id)
