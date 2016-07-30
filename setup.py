@@ -15,6 +15,7 @@ setup(
         "SQLAlchemy==1.0.13",
         "Flask==0.11.1",
         "flask-restplus==0.9.2",
+        "marshmallow==2.9.1"
     ],
     
     tests_require=[

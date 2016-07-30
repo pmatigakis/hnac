@@ -5,6 +5,8 @@ from time import time, sleep
 from firebase import FirebaseApplication
 from requests import RequestException
 
+from hnac.schemas import is_story_item, HackernewsStorySchema
+
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +122,19 @@ class HackernewsStories(Source):
 
             self._throttle()
 
-            return self._get_story_data(story_id)
+            story_data = self._get_story_data(story_id)
+
+            if is_story_item(story_data):
+                schema = HackernewsStorySchema()
+
+                story = schema.load(story_data)
+
+                if not story.errors:
+                    return story
+
+                for field in story.errors:
+                    for error_message in story.errors[field]:
+                        logger.warning("story %d error: %s",
+                                       story_id, error_message)
 
         return None

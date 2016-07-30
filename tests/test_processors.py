@@ -4,6 +4,7 @@ from ConfigParser import ConfigParser
 from hnac.processors import SQLAlchemyStorage
 from hnac.configuration import HNAC_DB_SECTION, HNAC_DB
 from hnac.models import Story
+from hnac.schemas import HackernewsStorySchema
 
 from mock_data import story_1_data
 
@@ -21,7 +22,10 @@ class SQLAlchemyStorageTests(TestCase):
 
         processor.job_started(None)
 
-        story = processor.process_item(None, story_1_data)
+        schema = HackernewsStorySchema()
+        story_item = schema.load(story_1_data) 
+
+        story = processor.process_item(None, story_item)
 
         self.assertIsNotNone(story)
         self.assertIsNotNone(story.id)
@@ -59,7 +63,10 @@ class SQLAlchemyStorageItemUpdateTests(TestCase):
         updated_story_data["score"] = 100
         updated_story_data["descendants"] = 200
 
-        story = processor.process_item(None, updated_story_data)
+        schema = HackernewsStorySchema()
+        updated_story_item = schema.load(updated_story_data)
+
+        story = processor.process_item(None, updated_story_item)
 
         self.assertIsNotNone(story)
         self.assertIsNotNone(story.id)
