@@ -3,6 +3,8 @@ import os
 from os import path
 
 from sqlalchemy import create_engine
+from flask.ext.script import Manager, Command
+from flask import current_app
 
 from hnac.crawlers import create_hackernews_api_crawler_job
 from hnac.web.app import create_app
@@ -37,7 +39,17 @@ def start_crawler():
     job.run()
 
 
-def start_api_server():
+class CreateDatabase(Command):
+    """Create the hackernews crawler database"""
+
+    def run(self):
+        config = current_app.config
+
+        engine = create_engine(config["HNAC_DB"])
+        Base.metadata.create_all(engine)
+
+
+def main():
     configuration_file_path = path.abspath("settings.py")
 
     if not path.exists(configuration_file_path):
@@ -51,33 +63,8 @@ def start_api_server():
 
     app = create_app(environment, configuration_file_path)
 
-    host = app.config["HNAC_API_HOST"]
-    port = app.config["HNAC_API_PORT"]
+    manager = Manager(app)
 
-    app.run(host, port)
+    manager.add_command("initdb", CreateDatabase())
 
-
-def create_database():
-    configuration_file_path = path.abspath("settings.py")
-
-    if not path.exists(configuration_file_path):
-        print("File settings.py doesn't exist")
-        exit(1)
-    elif not path.isfile(configuration_file_path):
-        print("settings.py is not a file")
-        exit(1)
-
-    d = types.ModuleType('settings')
-    d.__file__ = configuration_file_path
-
-    with open(configuration_file_path) as config_file:
-        exec(compile(config_file.read(), configuration_file_path, 'exec'),
-             d.__dict__)
-
-    if "HNAC_DB" not in d.__dict__:
-        print("The settings variable HNAC_DB does't exist")
-        exit(1)
-
-    engine = create_engine(d.HNAC_DB)
-
-    Base.metadata.create_all(engine)
+    manager.run()

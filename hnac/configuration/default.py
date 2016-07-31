@@ -25,3 +25,5 @@ HNAC_API_LOG_LEVEL = logging.INFO
 HNAC_API_LOG_FILE_SIZE = 2 ** 24
 HNAC_API_LOG_FILE_COUNT = 5
 HNAC_API_LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
+
+HNAC_API_ENVIRONMENT = "production"

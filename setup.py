@@ -15,7 +15,8 @@ setup(
         "SQLAlchemy==1.0.13",
         "Flask==0.11.1",
         "flask-restplus==0.9.2",
-        "marshmallow==2.9.1"
+        "marshmallow==2.9.1",
+        "Flask-Script==2.0.5"
     ],
     
     tests_require=[
@@ -27,9 +28,8 @@ setup(
 
     entry_points = {
         'console_scripts': [
-            'hnac_create_database=hnac.cli:create_database',
             'hnac_start_crawler=hnac.cli:start_crawler',
-            'hnac_start_api_server=hnac.cli:start_api_server'
+            'hnac=hnac.cli:main'
         ]
     },
       
