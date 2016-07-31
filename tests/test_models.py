@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError
 
-from hnac.models import Base, User, Domain, Url, Story
+from hnac.models import Base, User, Domain, Url, Story, APIUser
 
 from mock_data import story_1_data
 
@@ -357,6 +357,126 @@ class StoryUpdateTests(TestCase):
         self.assertIsNotNone(story.created_at)
         self.assertIsNotNone(story.added_at)
         self.assertIsNotNone(story.updated_at)
+
+
+class APIUserCreationTests(TestCase):
+    def setUp(self):
+        self.engine = create_engine("sqlite:///:memory:")
+
+        Base.metadata.create_all(self.engine)
+
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
+
+    def tearDown(self):
+        self.Session.remove()
+
+    def test_create_api_user(self):
+        session = self.Session()
+
+        user = APIUser.create(session, "user1", "password")
+
+        self.assertIsNotNone(user)
+
+        session.commit()
+
+        self.assertIsNotNone(user.id)
+        self.assertEqual(user.username, "user1")
+        self.assertIsNotNone(user.password)
+        self.assertTrue(user.active)
+        self.assertIsNotNone(user.registered_at)
+        self.assertIsNotNone(user.jti)
+
+        session.close()
+
+class APIUserQueryTests(TestCase):
+    def setUp(self):
+        self.engine = create_engine("sqlite:///:memory:")
+
+        Base.metadata.create_all(self.engine)
+
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
+
+        session = self.Session()
+
+        self.username = "user1"
+        self.user = APIUser.create(session, self.username, "password")
+        session.commit()
+
+        session.close()
+
+    def tearDown(self):
+        self.Session.remove()
+
+    def test_get_user_by_username(self):
+        session = self.Session()
+
+        user = APIUser.get_by_username(session, self.username)
+
+        self.assertIsNotNone(user)
+        self.assertIsNotNone(user.id)
+        self.assertEqual(user.username, self.username)
+        self.assertIsNotNone(user.password)
+        self.assertTrue(user.active)
+        self.assertIsNotNone(user.registered_at)
+        self.assertIsNotNone(user.jti)
+        
+        session.close()
+
+    def test_delete_user(self):
+        session = self.Session()
+
+        user = APIUser.delete(session, self.username)
+        
+        self.assertIsNotNone(user)
+
+        session.commit()
+
+        user = session.query(APIUser)\
+                      .filter_by(username=self.username)\
+                      .one_or_none() 
+
+        self.assertIsNone(user)
+
+class APIUserPasswordManagementTests(TestCase):
+    def setUp(self):
+        self.engine = create_engine("sqlite:///:memory:")
+
+        Base.metadata.create_all(self.engine)
+
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
+
+        session = self.Session()
+
+        self.username = "user1"
+        self.password = "password"
+        self.user = APIUser.create(session, self.username, self.password)
+        session.commit()
+
+        session.close()
+
+    def tearDown(self):
+        self.Session.remove()
+
+    def test_change_user_password(self):
+        session = self.Session() 
+    
+        user = APIUser.get_by_username(session, self.username)
+
+        original_password = user.password
+        original_jti = user.jti
+
+        new_password = "new_{}".format(self.password)
+
+        user.change_password(new_password)
+        session.commit()
+
+        self.assertIsNotNone(user.password)
+        self.assertIsNotNone(user.jti)
+
+        self.assertNotEqual(user.password, original_password)
+        self.assertNotEqual(user.jti, original_jti)
+
+        session.close()
 
 
 if __name__ == '__main__':

@@ -28,8 +28,8 @@ setup(
 
     entry_points = {
         'console_scripts': [
-            'hnac_start_crawler=hnac.cli:start_crawler',
-            'hnac=hnac.cli:main'
+            'hnac_start_crawler=hnac.cli.cli:start_crawler',
+            'hnac=hnac.cli.cli:main'
         ]
     },
       

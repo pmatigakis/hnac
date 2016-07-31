@@ -2,14 +2,14 @@ import types
 import os
 from os import path
 
-from sqlalchemy import create_engine
-from flask.ext.script import Manager, Command
-from flask import current_app
+from flask_script import Manager
 
 from hnac.crawlers import create_hackernews_api_crawler_job
 from hnac.web.app import create_app
-from hnac.models import Base
 from hnac.configuration import default
+from hnac.cli.commands.database import CreateDatabase
+from hnac.cli.commands.users import (CreateAPIUser, ListAPIUsers,
+                                     DeleteAPIUser, ChangeAPIUserPassword)
 
 
 def start_crawler():
@@ -39,16 +39,6 @@ def start_crawler():
     job.run()
 
 
-class CreateDatabase(Command):
-    """Create the hackernews crawler database"""
-
-    def run(self):
-        config = current_app.config
-
-        engine = create_engine(config["HNAC_DB"])
-        Base.metadata.create_all(engine)
-
-
 def main():
     configuration_file_path = path.abspath("settings.py")
 
@@ -66,5 +56,13 @@ def main():
     manager = Manager(app)
 
     manager.add_command("initdb", CreateDatabase())
+
+    user_manager = Manager(usage="API user management")
+    user_manager.add_command("create", CreateAPIUser())
+    user_manager.add_command("delete", DeleteAPIUser())
+    user_manager.add_command("list", ListAPIUsers())
+    user_manager.add_command("change_password", ChangeAPIUserPassword())
+
+    manager.add_command("users", user_manager)
 
     manager.run()
