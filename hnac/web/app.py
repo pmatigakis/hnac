@@ -6,6 +6,7 @@ from flask import Flask
 from hnac.web import SessionMaker, session
 from hnac.web.apis.api_v1 import blueprint as api_v1
 from hnac.web.views import frontend
+from hnac.web.authentication import login_manager
 
 
 def create_app(environment="production", settings_module=None):
@@ -61,6 +62,8 @@ def create_app(environment="production", settings_module=None):
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         session.remove()
+
+    login_manager.init_app(app)
 
     app.register_blueprint(api_v1)
     app.register_blueprint(frontend)

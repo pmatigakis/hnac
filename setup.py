@@ -16,7 +16,9 @@ setup(
         "Flask==0.11.1",
         "flask-restplus==0.9.2",
         "marshmallow==2.9.1",
-        "Flask-Script==2.0.5"
+        "Flask-Script==2.0.5",
+        "Flask-Login==0.3.2",
+        "Flask-WTF==0.12"
     ],
     
     tests_require=[

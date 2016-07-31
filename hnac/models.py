@@ -6,10 +6,10 @@ import pytz
 from sqlalchemy import (Column, String, Integer, DateTime, ForeignKey,
                         BigInteger, Boolean)
 
-from werkzeug.security import generate_password_hash
-
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from flask_login import UserMixin
 
 
 Base = declarative_base()
@@ -160,7 +160,7 @@ class Story(Base):
         return story
 
 
-class APIUser(Base):
+class APIUser(Base, UserMixin):
     __tablename__ = "api_users"
 
     id = Column(Integer, nullable=False, primary_key=True)
@@ -194,6 +194,22 @@ class APIUser(Base):
             session.delete(user)
 
         return user
+
+    @classmethod
+    def authenticate(cls, session, username, password):
+        user = cls.get_by_username(session, username)
+
+        if not user:
+            return None
+
+        if not check_password_hash(user.password, password):
+            return None
+
+        return user
+
+    @property
+    def is_active(self):
+        return self.active
 
     def change_password(self, password):
         self.password = generate_password_hash(password)

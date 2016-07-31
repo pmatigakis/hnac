@@ -1,6 +1,6 @@
 import logging
 
-SECRET = "secret"
+SECRET_KEY = "secret"
 TESTING = False
 DEBUG = False
 

@@ -1,1 +1,1 @@
-HNAC_DB = "sqlite:///:memory:"
+HNAC_DB = "sqlite:///hnac.db"

@@ -479,5 +479,50 @@ class APIUserPasswordManagementTests(TestCase):
         session.close()
 
 
+class APIUserAuthenticationTests(TestCase):
+    def setUp(self):
+        self.engine = create_engine("sqlite:///:memory:")
+
+        Base.metadata.create_all(self.engine)
+
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
+
+        session = self.Session()
+
+        self.unknown_user = "unknown_user"
+        self.username = "user1"
+        self.password = "password"
+        self.user = APIUser.create(session, self.username, self.password)
+        session.commit()
+
+        session.close()
+
+    def tearDown(self):
+        self.Session.remove()
+
+    def test_authenticate_user(self):
+        session = self.Session() 
+
+        user = APIUser.authenticate(session, self.username, self.password)
+
+        self.assertIsNotNone(user)
+
+    def test_fail_to_authenticate_with_invalid_password(self):
+        session = self.Session() 
+
+        password = "invalid_{}".format(self.password)
+
+        user = APIUser.authenticate(session, self.username, password)
+
+        self.assertIsNone(user)
+
+    def test_fail_to_authenticate_unknown_user(self):
+        session = self.Session() 
+
+        user = APIUser.authenticate(session, self.unknown_user, self.password)
+
+        self.assertIsNone(user)
+
+
 if __name__ == '__main__':
     main()
