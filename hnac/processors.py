@@ -55,7 +55,7 @@ class SQLAlchemyStorage(Processor):
             return None
 
         if item.data["type"] != "story":
-            logger.debug("item is not a story object")
+            logger.warning("item is not a story object")
             return None
 
         story_id = item.data["id"]
@@ -63,16 +63,18 @@ class SQLAlchemyStorage(Processor):
         story = Story.get_by_id(self._session, story_id)
 
         if not story:
+            logger.debug("Saving story with id %d", story_id)
             story = Story.create_from_dict(self._session, item.data)
         else:
+            logger.debug("Updating story with id %d", story_id)
             story = Story.update_from_dict(self._session, item.data)
 
         try:
             self._session.commit()
         except SQLAlchemyError:
-            logger.error("failed to save or update story %d", story_id)
-
             self._session.rollback()
+            
+            logger.exception("failed to save or update story %d", story_id)
 
             return None
 

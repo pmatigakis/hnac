@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from hnac.jobs import HackernewsStoryDownloader
+from hnac.jobs import Job
 
 
 def create_hackernews_api_crawler_job(config):
@@ -37,6 +37,14 @@ def create_hackernews_api_crawler_job(config):
 
         logger.setLevel(log_level)
 
-    job = HackernewsStoryDownloader(config)
+    source = config["SOURCE"]()
+    source.configure(config)
+
+    processors = [processor() for processor in config["PROCESSORS"]]
+
+    for processor in processors:
+        processor.configure(config)
+
+    job = Job(config, source, processors)
 
     return job

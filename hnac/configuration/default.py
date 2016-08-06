@@ -1,5 +1,9 @@
 import logging
 
+from hnac.sources import HackernewsStories
+from hnac.processors import SQLAlchemyStorage
+
+
 SECRET_KEY = "secret"
 TESTING = False
 DEBUG = False
@@ -27,3 +31,9 @@ HNAC_API_LOG_FILE_COUNT = 5
 HNAC_API_LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
 HNAC_API_ENVIRONMENT = "production"
+
+SOURCE = HackernewsStories
+
+PROCESSORS = [
+    SQLAlchemyStorage
+]

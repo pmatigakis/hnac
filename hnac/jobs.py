@@ -2,11 +2,12 @@ import logging
 from uuid import uuid4
 from datetime import datetime
 
-from hnac.sources import HackernewsStories
-from hnac.processors import SQLAlchemyStorage
-
 
 logger = logging.getLogger(__name__)
+
+
+class JobExecutionError(Exception):
+    pass
 
 
 class Report(object):
@@ -34,17 +35,13 @@ class Job(object):
 
         start_time = datetime.utcnow()
 
-        self._source.configure(self._config)
         self._source.job_started(self)
 
         for processor in self._processors:
-            processor.configure(self._config)
             processor.job_started(self)
 
         try:
-            while self._source.has_more_items():
-                item = self._source.get_next_item()
-
+            for item in self._source.items():
                 for processor in self._processors:
                     processor.process_item(self._source, item)
 
@@ -53,8 +50,11 @@ class Job(object):
             logger.info("Finished job with id %s", self.id)
         except (KeyboardInterrupt, SystemExit):
             logger.info("Job with %s stopped by user or system", self.id)
+        except JobExecutionError:
+            logger.error("Failed to execute job with id %s", self.id)
+            self.failed = True
         except:
-            logger.exception("Error in job with id %s", self.id)
+            logger.exception("Error occurred in job with id %s", self.id)
 
             self.failed = True
         finally:
@@ -66,13 +66,3 @@ class Job(object):
         end_time = datetime.now()
 
         return Report(self, start_time, end_time)
-
-
-class HackernewsStoryDownloader(Job):
-    def __init__(self, config):
-        source = HackernewsStories()
-        processors = [SQLAlchemyStorage()]
-
-        super(HackernewsStoryDownloader, self).__init__(config,
-                                                        source,
-                                                        processors)

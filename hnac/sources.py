@@ -6,20 +6,21 @@ from firebase import FirebaseApplication
 from requests import RequestException
 
 from hnac.schemas import is_story_item, HackernewsStorySchema
+from hnac.jobs import JobExecutionError
 
 
 logger = logging.getLogger(__name__)
+
+
+class RetryCountExceeded(Exception):
+    pass
 
 
 class Source(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def has_more_items(self):
-        pass
-
-    @abstractmethod
-    def get_next_item(self):
+    def items(self):
         pass
 
     def configure(self, config):
@@ -58,13 +59,6 @@ class HackernewsStories(Source):
         if "HNAC_CRAWLER_ABORT_AFTER" in config:
             self.abort_after = config["HNAC_CRAWLER_ABORT_AFTER"]
 
-    def _fetch_item(self, item_id):
-        logger.debug("Fetching hackernews item %d", item_id)
-
-        self._last_request_time = time()
-
-        return self._firebase.get("/v0/item", item_id)
-
     def _throttle(self):
         time_diff = time() - self._last_request_time
 
@@ -82,56 +76,65 @@ class HackernewsStories(Source):
         while True:
             try:
                 return self._firebase.get("/v0/newstories", None)
-            except RequestException as e:
-                print e
+            except RequestException:
                 logger.exception("Failed to fetch new story ids")
 
                 failure_count += 1
                 if failure_count > self.abort_after:
-                    raise
+                    raise RetryCountExceeded()
 
                 sleep(self.backoff_time)
 
     def _get_story_data(self, story_id):
+        logger.debug("Fetching hackernews item %d", story_id)
+
         failure_count = 0
 
         while True:
             try:
-                return self._fetch_item(story_id)
+                self._last_request_time = time()
+
+                return self._firebase.get("/v0/item", story_id)
             except RequestException:
                 logger.exception("Failed to fetch story %d", story_id)
 
                 failure_count += 1
                 if failure_count > self.abort_after:
-                    raise
+                    raise RetryCountExceeded()
 
                 sleep(self.backoff_time)
 
-    def has_more_items(self):
-        if self._story_ids is None:
-            self._story_ids = self._get_new_stories()
+    def items(self):
+        try:
+            story_ids = self._get_new_stories()
+        except RetryCountExceeded:
+            logger.error("Job stopped because maximum retry count has been "
+                         "exceeded while fetching new story id's")
+            raise JobExecutionError()
 
-        return len(self._story_ids) > 0
+        schema = HackernewsStorySchema()
 
-    def get_next_item(self):
-        if self._story_ids:
-            story_id = self._story_ids.pop()
-
+        for story_id in story_ids:
             self._throttle()
 
-            story_data = self._get_story_data(story_id)
+            try:
+                story_data = self._get_story_data(story_id)
+            except RetryCountExceeded:
+                logger.error("Job stopped because maximum retry count has "
+                             "been exceeded while fetching stories")
+                raise JobExecutionError()
 
-            if is_story_item(story_data):
-                schema = HackernewsStorySchema()
+            if not is_story_item(story_data):
+                logger.warning("Hackernews item with id %d is not a story",
+                               story_id)
+                continue
 
-                story = schema.load(story_data)
+            story = schema.load(story_data)
 
-                if not story.errors:
-                    return story
-
+            if not story.errors:
+                yield story
+            else:
                 for field in story.errors:
                     for error_message in story.errors[field]:
                         logger.warning("story %d error: %s",
                                        story_id, error_message)
-
-        return None
