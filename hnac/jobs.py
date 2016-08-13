@@ -53,7 +53,7 @@ class Job(object):
         except JobExecutionError:
             logger.error("Failed to execute job with id %s", self.id)
             self.failed = True
-        except:
+        except Exception:
             logger.exception("Error occurred in job with id %s", self.id)
 
             self.failed = True

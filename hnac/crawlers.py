@@ -4,6 +4,9 @@ from logging.handlers import RotatingFileHandler
 from hnac.jobs import Job
 
 
+logger = logging.getLogger(__name__)
+
+
 def create_hackernews_api_crawler_job(config):
     if config["HNAC_CRAWLER_ENABLE_LOGGING"]:
 
@@ -37,14 +40,18 @@ def create_hackernews_api_crawler_job(config):
 
         logger.setLevel(log_level)
 
+    logger.debug("Initializing data source")
     source = config["SOURCE"]()
     source.configure(config)
 
+    logger.debug("Initializing data processors")
     processors = [processor() for processor in config["PROCESSORS"]]
 
     for processor in processors:
         processor.configure(config)
 
     job = Job(config, source, processors)
+
+    logger.info("created job with id %s", job.id)
 
     return job
