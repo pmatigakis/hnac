@@ -43,7 +43,11 @@ class Job(object):
         try:
             for item in self._source.items():
                 for processor in self._processors:
-                    processor.process_item(self._source, item)
+                    result = processor.process_item(self._source, item)
+
+                    if result is None:
+                        logger.error("Processor didn't process successfully "
+                                     "this item")
 
                 self.processed_item_count += 1
 
