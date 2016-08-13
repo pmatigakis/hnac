@@ -388,6 +388,7 @@ class APIUserCreationTests(TestCase):
 
         session.close()
 
+
 class APIUserQueryTests(TestCase):
     def setUp(self):
         self.engine = create_engine("sqlite:///:memory:")
@@ -419,23 +420,24 @@ class APIUserQueryTests(TestCase):
         self.assertTrue(user.active)
         self.assertIsNotNone(user.registered_at)
         self.assertIsNotNone(user.jti)
-        
+
         session.close()
 
     def test_delete_user(self):
         session = self.Session()
 
         user = APIUser.delete(session, self.username)
-        
+
         self.assertIsNotNone(user)
 
         session.commit()
 
         user = session.query(APIUser)\
                       .filter_by(username=self.username)\
-                      .one_or_none() 
+                      .one_or_none()
 
         self.assertIsNone(user)
+
 
 class APIUserPasswordManagementTests(TestCase):
     def setUp(self):
@@ -458,8 +460,8 @@ class APIUserPasswordManagementTests(TestCase):
         self.Session.remove()
 
     def test_change_user_password(self):
-        session = self.Session() 
-    
+        session = self.Session()
+
         user = APIUser.get_by_username(session, self.username)
 
         original_password = user.password
@@ -501,14 +503,14 @@ class APIUserAuthenticationTests(TestCase):
         self.Session.remove()
 
     def test_authenticate_user(self):
-        session = self.Session() 
+        session = self.Session()
 
         user = APIUser.authenticate(session, self.username, self.password)
 
         self.assertIsNotNone(user)
 
     def test_fail_to_authenticate_with_invalid_password(self):
-        session = self.Session() 
+        session = self.Session()
 
         password = "invalid_{}".format(self.password)
 
@@ -517,7 +519,7 @@ class APIUserAuthenticationTests(TestCase):
         self.assertIsNone(user)
 
     def test_fail_to_authenticate_unknown_user(self):
-        session = self.Session() 
+        session = self.Session()
 
         user = APIUser.authenticate(session, self.unknown_user, self.password)
 

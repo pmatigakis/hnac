@@ -7,3 +7,4 @@ hnac.ini
 hnac.egg-info
 temp/
 .idea
+.eggs

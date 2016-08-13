@@ -76,12 +76,13 @@ class SQLAlchemyStorage(Processor):
             self._session.commit()
         except SQLAlchemyError:
             self._session.rollback()
-            
+
             logger.exception("failed to save or update story %d", story_id)
 
             return None
 
         return story
+
 
 class CouchDBStorage(Processor):
     def __init__(self):
@@ -92,10 +93,10 @@ class CouchDBStorage(Processor):
     def configure(self, config):
         connection_string = config["HNAC_COUCHDB_SERVER"]
         database_name = config["HNAC_COUCHDB_DATABASE"]
-        
+
         logger.debug("Using CouchDB server at %s", connection_string)
         logger.debug("Using CouchDB database %s", database_name)
- 
+
         server = couchdb.Server(connection_string)
         self._db = server[database_name]
 

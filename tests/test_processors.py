@@ -16,7 +16,7 @@ class SQLAlchemyStorageTests(TestCase):
 
         processor.configure(self.config)
 
-        processor.job_started(None) 
+        processor.job_started(None)
 
         story = processor.process_item(None, story_1_data)
 
