@@ -1,29 +1,46 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, current_app
 from flask_login import login_user, logout_user, login_required
+import couchdb
 
 from hnac.web import session
-from hnac.models import Story
-from hnac.queries.stories import fetch_stories
 from hnac.web.forms import LoginForm
-from hnac.models import APIUser
+from hnac.models import User
 
 
-frontend = Blueprint("frontend", __name__)
+blueprint = Blueprint("frontend", __name__)
 
 
-@frontend.route("/")
+@blueprint.route("/")
 @login_required
 def index():
-    latest_stories = fetch_stories(session, limit=5)
+    config = current_app.config
 
-    story_count = session.query(Story).count()
+    server = couchdb.Server(config["HNAC_COUCHDB_SERVER"])
+    db = server[config["HNAC_COUCHDB_DATABASE"]]
+
+    latest_stories = []
+
+    result = db.view("_all_docs", limit=5, include_docs=True, descending=True)
+
+    for story in  result.rows:
+        story = {
+            "by": story.doc["by"],
+            "id": story.doc["id"],
+            "time": story.doc["time"],
+            "title": story.doc["title"],
+            "url": story.doc["url"],
+            "score": story.doc["score"],
+            "descendants": story.doc["descendants"],
+        }
+
+        latest_stories.append(story)
 
     return render_template("index.html",
-                           story_count=story_count,
+                           story_count=result.total_rows,
                            latest_stories=latest_stories)
 
 
-@frontend.route("/login", methods=["GET", "POST"])
+@blueprint.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
 
@@ -31,7 +48,7 @@ def login():
         username = form.username.data
         password = form.password.data
 
-        user = APIUser.authenticate(session, username, password)
+        user = User.authenticate(session, username, password)
 
         if not user:
             return render_template("login.html", form=form)
@@ -43,7 +60,7 @@ def login():
     return render_template("login.html", form=form)
 
 
-@frontend.route("/logout")
+@blueprint.route("/logout")
 def logout():
     logout_user()
 

@@ -1,6 +1,6 @@
 from flask_script import Command, Option
 
-from hnac.models import APIUser
+from hnac.models import User
 from hnac.web import session
 
 
@@ -13,14 +13,14 @@ class CreateAPIUser(Command):
     )
 
     def run(self, username, password):
-        user = APIUser.get_by_username(session, username)
+        user = User.get_by_username(session, username)
 
         if user:
             print("User '{}' already exists".format(username))
 
             return
 
-        user = APIUser.create(session, username, password)
+        user = User.create(session, username, password)
 
         session.commit()
 
@@ -35,7 +35,7 @@ class DeleteAPIUser(Command):
     )
 
     def run(self, username):
-        user = APIUser.delete(session, username)
+        user = User.delete(session, username)
 
         if not user:
             print("User {} doesn't exist".format(username))
@@ -51,7 +51,7 @@ class ListAPIUsers(Command):
 
     def run(self):
         print("Username\t\tRegistered at")
-        for user in session.query(APIUser).all():
+        for user in session.query(User).all():
             msg = "{username}\t\t{registered_at}"
             print(msg.format(username=user.username,
                              registered_at=user.registered_at))
@@ -66,7 +66,7 @@ class ChangeAPIUserPassword(Command):
     )
 
     def run(self, username, password):
-        user = APIUser.get_by_username(session, username)
+        user = User.get_by_username(session, username)
 
         if not user:
             print("User {} doesn't exist".format(username))

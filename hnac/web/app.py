@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from flask import Flask
 
 from hnac.web import SessionMaker, session
-from hnac.web.apis.api_v1 import blueprint as api_v1
-from hnac.web.views import frontend
+from hnac.web.apis import api_v1
+from hnac.web import views
 from hnac.web.authentication import login_manager
 
 
@@ -65,7 +65,7 @@ def create_app(environment="production", settings_module=None):
 
     login_manager.init_app(app)
 
-    app.register_blueprint(api_v1)
-    app.register_blueprint(frontend)
+    app.register_blueprint(api_v1.blueprint, url_prefix="/api/v1")
+    app.register_blueprint(views.blueprint)
 
     return app

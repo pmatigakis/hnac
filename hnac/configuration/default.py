@@ -1,7 +1,6 @@
 import logging
 
 from hnac.sources import HackernewsStories
-from hnac.processors import SQLAlchemyStorage
 
 
 SECRET_KEY = "secret"
@@ -41,5 +40,7 @@ HNAC_API_ENVIRONMENT = "production"
 SOURCE = HackernewsStories
 
 PROCESSORS = [
-    SQLAlchemyStorage
 ]
+
+HNAC_COUCHDB_SERVER = "http://localhost:5984"
+HNAC_COUCHDB_DATABASE = "hnac"

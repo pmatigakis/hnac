@@ -1,51 +1,62 @@
-from flask_restplus import Resource, Namespace
+from flask import current_app
+from flask_restful import Resource, marshal_with, abort
+import couchdb
 
-from hnac.web import session
-from hnac.models import Story
 from hnac.web.apis.arguments import story_list_query_parser
-from hnac.queries.stories import fetch_stories
-from hnac.web.apis.models import brief_story, story as story_model
+from hnac.web.apis import models
 
 
-api = Namespace("stories")
-api.models[brief_story.name] = brief_story
-api.models[story_model.name] = story_model
-
-
-@api.route("/")
-class LatestStories(Resource):
-    @api.expect(story_list_query_parser)
-    @api.marshal_list_with(brief_story)
+class Stories(Resource):
+    marshal_with(models.story)
     def get(self):
         args = story_list_query_parser.parse_args()
 
-        stories = fetch_stories(session, args.limit, args.offset)
+        config = current_app.config
 
-        stories = [{"id": story.id,
-                    "title": story.title,
-                    "url": story.url.url}
-                   for story in stories]
+        server = couchdb.Server(config["HNAC_COUCHDB_SERVER"])
+        db = server[config["HNAC_COUCHDB_DATABASE"]]
+
+        stories = []
+
+        for story in db.view("_all_docs", limit=args.limit,
+                              include_docs=True, descending=True,
+                              skip=args.offset):
+
+            story = {
+                "by": story.doc["by"],
+                "id": story.doc["id"],
+                "time": story.doc["time"],
+                "title": story.doc["title"],
+                "url": story.doc["url"],
+                "score": story.doc["score"],
+                "descendants": story.doc["descendants"],
+            }
+
+            stories.append(story)
 
         return stories
 
 
-@api.route("/<int:story_id>")
 class StoryDetails(Resource):
-    @api.marshal_with(story_model)
+    marshal_with(models.story)
     def get(self, story_id):
-        story = session.query(Story).get(story_id)
+        config = current_app.config
 
-        if not story:
-            return {"error": "story doesn't exist", "story_id": story_id}
+        server = couchdb.Server(config["HNAC_COUCHDB_SERVER"])
+        db = server[config["HNAC_COUCHDB_DATABASE"]]
 
-        story_details = {
-            "id": story_id,
-            "title": story.title,
-            "url": story.url.url,
-            "username": story.user.username,
-            "created_at": story.created_at,
-            "score": story.score,
-            "comment_count": story.comment_count
-        }
+        doc_id = "hackernews/item/{}".format(story_id)
 
-        return story_details
+        doc = db.get(doc_id)
+
+        if not doc:
+            abort(
+                404,
+                error="story doesn't exist",
+                story_id=story_id
+            )
+
+        del doc["_id"]
+        del doc["_rev"]
+
+        return doc

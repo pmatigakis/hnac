@@ -4,7 +4,7 @@ from unittest import TestCase, main
 from sqlalchemy import create_engine
 from hnac.web.app import create_app
 from hnac.web.authentication import load_user
-from hnac.models import Base, APIUser
+from hnac.models import Base, User
 from hnac.web import session
 
 
@@ -25,7 +25,7 @@ class LoadUserTests(TestCase):
 
         self.username = "user1"
 
-        user = APIUser.create(session, self.username, "password")
+        user = User.create(session, self.username, "password")
         session.commit()
 
         self.user_id = user.id

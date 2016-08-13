@@ -16,11 +16,11 @@
     <div>
         {% for story in latest_stories %}
             <div>{{ story.title }}</div>
-            <div><a href="{{ story.url.url }}">{{ story.url.url }}</a></div>
-            <div><a href="https://news.ycombinator.com/user?id={{ story.user.username }}">{{ story.user.username }}</a> |
-                 score {{ story.score }} |
-                 <a href="https://news.ycombinator.com/item?id={{ story.id }}">comments {{ story.comment_count }}</a> |
-                 {{ story.created_at.isoformat() }}</div>
+            <div><a href="{{ story['url'] }}">{{ story["url"] }}</a></div>
+            <div><a href="https://news.ycombinator.com/user?id={{ story['by'] }}">{{ story["by"] }}</a> |
+                 score {{ story["score"] }} |
+                 <a href="https://news.ycombinator.com/item?id={{ story['id'] }}">comments {{ story["descendants"] }}</a> |
+                 {{ story["time"] }}</div>
             <br />
         {% endfor %}
     </div>

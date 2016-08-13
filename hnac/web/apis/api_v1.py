@@ -1,10 +1,11 @@
 from flask import Blueprint
-from flask_restplus import Api
+from flask_restful import Api
 
-from hnac.web.apis.stories import api as stories_ns
+from hnac.web.apis import stories
 
-blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
+blueprint = Blueprint("api", __name__)
 
 api = Api(blueprint)
 
-api.add_namespace(stories_ns)
+api.add_resource(stories.Stories, "/stories")
+api.add_resource(stories.StoryDetails,"/story/<int:story_id>")
