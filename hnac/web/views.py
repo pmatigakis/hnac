@@ -22,7 +22,7 @@ def index():
 
     result = db.view("_all_docs", limit=5, include_docs=True, descending=True)
 
-    for story in  result.rows:
+    for story in result.rows:
         story = {
             "by": story.doc["by"],
             "id": story.doc["id"],

@@ -7,7 +7,7 @@ from hnac.web.apis import models
 
 
 class Stories(Resource):
-    marshal_with(models.story)
+    @marshal_with(models.story)
     def get(self):
         args = story_list_query_parser.parse_args()
 
@@ -19,8 +19,8 @@ class Stories(Resource):
         stories = []
 
         for story in db.view("_all_docs", limit=args.limit,
-                              include_docs=True, descending=True,
-                              skip=args.offset):
+                             include_docs=True, descending=True,
+                             skip=args.offset):
 
             story = {
                 "by": story.doc["by"],
@@ -38,7 +38,7 @@ class Stories(Resource):
 
 
 class StoryDetails(Resource):
-    marshal_with(models.story)
+    @marshal_with(models.story)
     def get(self, story_id):
         config = current_app.config
 
