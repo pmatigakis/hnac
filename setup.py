@@ -19,7 +19,8 @@ setup(
         "Flask-Script==2.0.5",
         "Flask-Login==0.3.2",
         "Flask-WTF==0.12",
-        "CouchDB==1.1"
+        "CouchDB==1.1",
+        "Flask-RESTful==0.3.5"
     ],
     
     tests_require=[

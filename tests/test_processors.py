@@ -1,9 +1,7 @@
 from unittest import TestCase, main
-from ConfigParser import ConfigParser
 
 from hnac.processors import SQLAlchemyStorage
 from hnac.models import Story
-from hnac.schemas import HackernewsStorySchema
 
 from mock_data import story_1_data
 
@@ -11,19 +9,16 @@ from mock_data import story_1_data
 class SQLAlchemyStorageTests(TestCase):
     def setUp(self):
         self.config = {}
-        self.config["HNAC_DB"] = "sqlite:///:memory:"
+        self.config["HNAC_SQLALCHEMY_DATABASE"] = "sqlite:///:memory:"
 
     def test_process_item(self):
         processor = SQLAlchemyStorage()
 
         processor.configure(self.config)
 
-        processor.job_started(None)
+        processor.job_started(None) 
 
-        schema = HackernewsStorySchema()
-        story_item = schema.load(story_1_data) 
-
-        story = processor.process_item(None, story_item)
+        story = processor.process_item(None, story_1_data)
 
         self.assertIsNotNone(story)
         self.assertIsNotNone(story.id)
@@ -44,7 +39,7 @@ class SQLAlchemyStorageTests(TestCase):
 class SQLAlchemyStorageItemUpdateTests(TestCase):
     def setUp(self):
         self.config = {}
-        self.config["HNAC_DB"] = "sqlite:///:memory:"
+        self.config["HNAC_SQLALCHEMY_DATABASE"] = "sqlite:///:memory:"
 
     def test_process_item(self):
         processor = SQLAlchemyStorage()
@@ -60,10 +55,7 @@ class SQLAlchemyStorageItemUpdateTests(TestCase):
         updated_story_data["score"] = 100
         updated_story_data["descendants"] = 200
 
-        schema = HackernewsStorySchema()
-        updated_story_item = schema.load(updated_story_data)
-
-        story = processor.process_item(None, updated_story_item)
+        story = processor.process_item(None, updated_story_data)
 
         self.assertIsNotNone(story)
         self.assertIsNotNone(story.id)

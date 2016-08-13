@@ -5,7 +5,7 @@ from time import time, sleep
 from firebase import FirebaseApplication
 from requests import RequestException
 
-from hnac.schemas import is_story_item, HackernewsStorySchema
+from hnac.schemas import is_story_item
 from hnac.jobs import JobExecutionError
 
 
@@ -112,8 +112,6 @@ class HackernewsStories(Source):
                          "exceeded while fetching new story id's")
             raise JobExecutionError()
 
-        schema = HackernewsStorySchema()
-
         for story_id in story_ids:
             self._throttle()
 
@@ -129,12 +127,4 @@ class HackernewsStories(Source):
                                story_id)
                 continue
 
-            story = schema.load(story_data)
-
-            if not story.errors:
-                yield story
-            else:
-                for field in story.errors:
-                    for error_message in story.errors[field]:
-                        logger.warning("story %d error: %s",
-                                       story_id, error_message)
+            yield story_data

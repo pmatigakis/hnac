@@ -20,6 +20,12 @@ HNAC_CRAWLER_ABORT_AFTER = 3
 
 HNAC_DB = "sqlite:///:memory:"
 
+HNAC_SQLALCHEMY_DATABASE = "sqlite:///:memory:"
+
+HNAC_COUCHDB_SERVER = "http://localhost:5984"
+HNAC_COUCHDB_DATABASE = "hnac"
+
+
 HNAC_API_HOST = "127.0.0.1"
 HNAC_API_PORT = 5000
 
