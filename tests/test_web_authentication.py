@@ -1,42 +1,32 @@
-from os import path, remove
 from unittest import TestCase, main
 
-from sqlalchemy import create_engine
-from hnac.web.app import create_app
+from mock import patch, Mock
+
 from hnac.web.authentication import load_user
-from hnac.models import Base, User
-from hnac.web import session
+from hnac.models import User
+
+
+def mocked_query():
+    users = {
+        1: User(id=1, username="user1", password="user1_password")
+    }
+
+    query_mock = Mock()
+    query = query_mock.return_value
+    query.get.side_effect = lambda user_id: users.get(user_id)
+
+    return query_mock
 
 
 class LoadUserTests(TestCase):
-    def setUp(self):
-        try:
-            remove("hnac.db")
-        except:
-            pass
-
-        settings_file_path = path.join(path.abspath(path.dirname(__file__)),
-                                       "settings.py")
-
-        self.app = create_app("testing", settings_file_path)
-
-        engine = create_engine(self.app.config["HNAC_DB"])
-        Base.metadata.create_all(engine)
-
-        self.username = "user1"
-
-        user = User.create(session, self.username, "password")
-        session.commit()
-
-        self.user_id = user.id
-
-    def tearDown(self):
-        remove("hnac.db")
-
+    @patch("hnac.web.session.query", mocked_query())
     def test_load_user(self):
-        user = load_user(self.user_id)
+        user = load_user(1)
 
         self.assertIsNotNone(user)
+        self.assertEqual(user.id, 1)
+        self.assertEqual(user.username, "user1")
+        self.assertEqual(user.password, "user1_password")
 
 
 if __name__ == "__main__":
