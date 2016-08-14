@@ -20,7 +20,7 @@ setup(
         "Flask-WTF==0.12",
         "CouchDB==1.1",
         "Flask-RESTful==0.3.5",
-        "Flask-WTF==0.12"
+        "Flask-JWT==0.3.2"
     ],
     
     tests_require=[
