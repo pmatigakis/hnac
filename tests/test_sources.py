@@ -15,7 +15,7 @@ class HackernewsStoriesItemRetrieval(TestCase):
 
         httpretty.register_uri(
             httpretty.GET,
-            "http://hacker-news.firebaseio.com/v0/newstories",
+            "https://hacker-news.firebaseio.com/v0/newstories",
             body="[11976079]",
             content="application/json"
         )
@@ -33,11 +33,8 @@ class HackernewsStoriesItemRetrieval(TestCase):
 
         source = HackernewsStories()
 
-        self.assertTrue(source.has_more_items())
-
-        story = source.get_next_item()
-
-        self.assertDictEqual(story, story_1_data)
+        for story in source.items():
+            self.assertDictEqual(story, story_1_data)
 
 
 if __name__ == "__main__":

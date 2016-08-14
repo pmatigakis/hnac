@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import uuid4
 
 from sqlalchemy import Column, String, Integer, DateTime, Boolean
 
@@ -17,7 +16,6 @@ class User(Base, UserMixin):
     id = Column(Integer, nullable=False, primary_key=True)
     username = Column(String(40), nullable=False, unique=True)
     password = Column(String(256), nullable=False)
-    jti = Column(String(32), nullable=False)
     registered_at = Column(DateTime(timezone=False), nullable=False)
     active = Column(Boolean, nullable=False)
 
@@ -30,8 +28,7 @@ class User(Base, UserMixin):
         user = cls(username=username,
                    password=generate_password_hash(password),
                    active=active,
-                   registered_at=datetime.utcnow(),
-                   jti=uuid4().hex)
+                   registered_at=datetime.utcnow())
 
         session.add(user)
 
@@ -64,5 +61,3 @@ class User(Base, UserMixin):
 
     def change_password(self, password):
         self.password = generate_password_hash(password)
-
-        self.jti = uuid4().hex

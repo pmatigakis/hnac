@@ -5,8 +5,8 @@ from flask import Flask
 
 from hnac.web import SessionMaker, session
 from hnac.web.apis import api_v1
-from hnac.web import views
-from hnac.web.authentication import login_manager
+from hnac.web import views, jwt
+from hnac.web.authentication import login_manager, authenticate, identity
 
 
 def create_app(environment="production", settings_module=None):
@@ -64,6 +64,10 @@ def create_app(environment="production", settings_module=None):
         session.remove()
 
     login_manager.init_app(app)
+
+    jwt.authentication_callback = authenticate
+    jwt.identity_callback = identity
+    jwt.init_app(app)
 
     app.register_blueprint(api_v1.blueprint, url_prefix="/api/v1")
     app.register_blueprint(views.blueprint)

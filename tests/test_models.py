@@ -31,7 +31,6 @@ class UserCreationTests(TestCase):
         self.assertIsNotNone(user.password)
         self.assertTrue(user.active)
         self.assertIsNotNone(user.registered_at)
-        self.assertIsNotNone(user.jti)
 
         session.close()
 
@@ -66,7 +65,6 @@ class UserQueryTests(TestCase):
         self.assertIsNotNone(user.password)
         self.assertTrue(user.active)
         self.assertIsNotNone(user.registered_at)
-        self.assertIsNotNone(user.jti)
 
         session.close()
 
@@ -112,7 +110,6 @@ class UserPasswordManagementTests(TestCase):
         user = User.get_by_username(session, self.username)
 
         original_password = user.password
-        original_jti = user.jti
 
         new_password = "new_{}".format(self.password)
 
@@ -120,10 +117,8 @@ class UserPasswordManagementTests(TestCase):
         session.commit()
 
         self.assertIsNotNone(user.password)
-        self.assertIsNotNone(user.jti)
 
         self.assertNotEqual(user.password, original_password)
-        self.assertNotEqual(user.jti, original_jti)
 
         session.close()
 
