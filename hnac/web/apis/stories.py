@@ -20,21 +20,10 @@ class Stories(Resource):
 
         stories = []
 
-        for story in db.view("_all_docs", limit=args.limit,
-                             include_docs=True, descending=True,
-                             skip=args.offset):
-
-            story = {
-                "by": story.doc["by"],
-                "id": story.doc["id"],
-                "time": story.doc["time"],
-                "title": story.doc["title"],
-                "url": story.doc["url"],
-                "score": story.doc["score"],
-                "descendants": story.doc["descendants"],
-            }
-
-            stories.append(story)
+        for row in db.view("_all_docs", limit=args.limit,
+                           include_docs=True, descending=True,
+                           skip=args.offset):
+            stories.append(row.doc["data"])
 
         return stories
 
@@ -59,7 +48,4 @@ class StoryDetails(Resource):
                 story_id=story_id
             )
 
-        del doc["_id"]
-        del doc["_rev"]
-
-        return doc
+        return doc["data"]

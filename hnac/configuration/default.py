@@ -16,6 +16,7 @@ HNAC_CRAWLER_LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 HNAC_CRAWLER_WAIT_TIME = 1.0
 HNAC_CRAWLER_BACKOFF_TIME = 1.0
 HNAC_CRAWLER_ABORT_AFTER = 3
+HNAC_CRAWLER_STORY_UPDATE_DELTA = 3600
 
 HNAC_DB = "sqlite:///:memory:"
 

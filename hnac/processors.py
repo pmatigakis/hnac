@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import logging
+from time import time
 
 import couchdb
 from couchdb.http import HTTPError
@@ -31,36 +32,49 @@ class CouchDBStorage(Processor):
     def __init__(self):
         super(CouchDBStorage, self).__init__()
 
+        self.update_delta = 3600
+
         self._db = None
 
     def configure(self, config):
         connection_string = config["HNAC_COUCHDB_SERVER"]
         database_name = config["HNAC_COUCHDB_DATABASE"]
 
-        logger.debug("Using CouchDB server at %s", connection_string)
-        logger.debug("Using CouchDB database %s", database_name)
+        logger.info("Using CouchDB server at %s", connection_string)
+        logger.info("Using CouchDB database %s", database_name)
 
         server = couchdb.Server(connection_string)
         self._db = server[database_name]
 
+        self.update_delta = config["HNAC_CRAWLER_STORY_UPDATE_DELTA"]
+
     def process_item(self, source, item):
         if not is_story_item(item):
             logger.warning("item is not a story object")
-            return None
+            return item
 
-        doc = self._db.get("hackernews/item/%d" % item["id"])
+        story_id = item["id"]
+        doc_id = "hackernews/item/%d" % story_id
+
+        doc = self._db.get(doc_id)
 
         if doc:
-            logger.debug("CochDb document with id %s already exists",
-                         "hackernews/item/%d" % item["id"])
-            doc.update(item)
-            item = doc
+            logger.debug("CouchDb document with id %s already exists", doc_id)
+
+            if doc["updated_at"] + self.update_delta > time():
+                logger.debug("Story with id %d doesn't need update", story_id)
+                return item
+        else:
+            doc = {}
+
+        doc["updated_at"] = time()
+        doc["data"] = item
 
         try:
-            self._db["hackernews/item/%d" % item["id"]] = item
+            self._db[doc_id] = doc
         except HTTPError:
             logger.exception("Failed to save story with id to CouchDB %d",
-                             item["id"])
+                             story_id)
             return None
 
         return item
