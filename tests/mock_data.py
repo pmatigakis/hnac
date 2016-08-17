@@ -9,3 +9,14 @@ story_1_data = {
     "url": "http://theinvisiblethings.blogspot.com/2009/10/evil-maid"
            "-goes-after-truecrypt.html"
 }
+
+story_2_data = {
+    "title": "Starting Your Big Data Journey with CDH, Docker and Pentaho BA",
+    "url": "http://www.lewisgavin.co.uk/CDH-Docker/",
+    "descendants": 0,
+    "by": "gavlaaaaaaaa",
+    "score": 1,
+    "time": 1471369583,
+    "type": "story",
+    "id": 12299134
+}

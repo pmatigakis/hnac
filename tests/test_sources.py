@@ -1,40 +1,40 @@
-import json
 from unittest import TestCase, main
-import re
 
-import httpretty
+from mock import patch
 
 from hnac.sources import HackernewsStories
 
-from mock_data import story_1_data
+from mock_data import story_1_data, story_2_data
+
+
+def firebase_get(url, *args, **kwargs):
+    if url == "/v0/newstories":
+        return [11976079, 12299134]
+    elif url == "/v0/item":
+        story_id = args[0]
+
+        stories = {
+            11976079: story_1_data,
+            12299134: story_2_data
+        }
+
+        return stories[story_id]
 
 
 class HackernewsStoriesItemRetrieval(TestCase):
-    def setUp(self):
-        self.skipTest("SSL issue with httpretty")
-
-        httpretty.register_uri(
-            httpretty.GET,
-            "https://hacker-news.firebaseio.com/v0/newstories",
-            body="[11976079]",
-            content="application/json"
-        )
-
-        httpretty.register_uri(
-            httpretty.GET,
-            re.compile(r"http://hacker-news.firebaseio.com/v0/item/(\d+)"),
-            body=json.dumps(story_1_data),
-            content="application/json"
-        )
-
-    @httpretty.activate
-    def test_get_next_item(self):
-        HackernewsStories.api_endpoint = "http://hacker-news.firebaseio.com"
+    @patch("hnac.sources.FirebaseApplication")
+    def test_get_next_item(self, mocked_firebase_application):
+        instance = mocked_firebase_application.return_value
+        instance.get.side_effect = firebase_get
 
         source = HackernewsStories()
 
-        for story in source.items():
-            self.assertDictEqual(story, story_1_data)
+        stories = [story for story in source.items()]
+
+        self.assertEqual(len(stories), 2)
+
+        self.assertDictEqual(stories[0], story_1_data)
+        self.assertDictEqual(stories[1], story_2_data)
 
 
 if __name__ == "__main__":
