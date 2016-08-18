@@ -36,6 +36,10 @@ class CouchDBStorage(Processor):
 
         self._db = None
 
+    def _init_database(self, host, database_name):
+        server = couchdb.Server(host)
+        self._db = server[database_name]
+
     def configure(self, config):
         connection_string = config["HNAC_COUCHDB_SERVER"]
         database_name = config["HNAC_COUCHDB_DATABASE"]
@@ -43,8 +47,7 @@ class CouchDBStorage(Processor):
         logger.info("Using CouchDB server at %s", connection_string)
         logger.info("Using CouchDB database %s", database_name)
 
-        server = couchdb.Server(connection_string)
-        self._db = server[database_name]
+        self._init_database(connection_string, database_name)
 
         self.update_delta = config["HNAC_CRAWLER_STORY_UPDATE_DELTA"]
 
