@@ -1,6 +1,7 @@
 import logging
 
 from hnac.sources import HackernewsStories
+from hnac.processors import CouchDBStorage
 
 
 SECRET_KEY = "secret"
@@ -41,6 +42,7 @@ HNAC_API_ENVIRONMENT = "production"
 SOURCE = HackernewsStories
 
 PROCESSORS = [
+    CouchDBStorage
 ]
 
 HNAC_COUCHDB_SERVER = "http://localhost:5984"
