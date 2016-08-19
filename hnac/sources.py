@@ -50,14 +50,14 @@ class HackernewsStories(Source):
         self._story_ids = None
 
     def configure(self, config):
-        if "HNAC_CRAWLER_WAIT_TIME" in config:
-            self.wait_time = config["HNAC_CRAWLER_WAIT_TIME"]
+        if "CRAWLER_WAIT_TIME" in config:
+            self.wait_time = config["CRAWLER_WAIT_TIME"]
 
-        if "HNAC_CRAWLER_BACKOFF_TIME" in config:
-            self.backoff_time = config["HNAC_CRAWLER_BACKOFF_TIME"]
+        if "CRAWLER_BACKOFF_TIME" in config:
+            self.backoff_time = config["CRAWLER_BACKOFF_TIME"]
 
-        if "HNAC_CRAWLER_ABORT_AFTER" in config:
-            self.abort_after = config["HNAC_CRAWLER_ABORT_AFTER"]
+        if "CRAWLER_ABORT_AFTER" in config:
+            self.abort_after = config["CRAWLER_ABORT_AFTER"]
 
     def _throttle(self):
         time_diff = time() - self._last_request_time

@@ -41,15 +41,15 @@ class CouchDBStorage(Processor):
         self._db = server[database_name]
 
     def configure(self, config):
-        connection_string = config["HNAC_COUCHDB_SERVER"]
-        database_name = config["HNAC_COUCHDB_DATABASE"]
+        connection_string = config["COUCHDB_SERVER"]
+        database_name = config["COUCHDB_DATABASE"]
 
         logger.info("Using CouchDB server at %s", connection_string)
         logger.info("Using CouchDB database %s", database_name)
 
         self._init_database(connection_string, database_name)
 
-        self.update_delta = config["HNAC_CRAWLER_STORY_UPDATE_DELTA"]
+        self.update_delta = config["CRAWLER_STORY_UPDATE_DELTA"]
 
     def process_item(self, source, item):
         if not is_story_item(item):

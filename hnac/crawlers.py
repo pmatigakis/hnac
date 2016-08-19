@@ -8,11 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 def create_hackernews_api_crawler_job(config):
-    if config["HNAC_CRAWLER_ENABLE_LOGGING"]:
+    if config["CRAWLER_ENABLE_LOGGING"]:
 
-        log_level = config["HNAC_CRAWLER_LOG_LEVEL"]
+        log_level = config["CRAWLER_LOG_LEVEL"]
 
-        log_format = config["HNAC_CRAWLER_LOG_FORMAT"]
+        log_format = config["CRAWLER_LOG_FORMAT"]
 
         formatter = logging.Formatter(log_format)
 
@@ -24,13 +24,13 @@ def create_hackernews_api_crawler_job(config):
 
         logger.addHandler(console_handler)
 
-        log_file = config["HNAC_CRAWLER_LOG_FILE"]
+        log_file = config["CRAWLER_LOG_FILE"]
 
         file_handler = RotatingFileHandler(
             log_file,
             mode="a",
-            maxBytes=config["HNAC_CRAWLER_LOG_FILE_SIZE"],
-            backupCount=config["HNAC_CRAWLER_LOG_FILE_COUNT"]
+            maxBytes=config["CRAWLER_LOG_FILE_SIZE"],
+            backupCount=config["CRAWLER_LOG_FILE_COUNT"]
         )
 
         file_handler.setFormatter(formatter)

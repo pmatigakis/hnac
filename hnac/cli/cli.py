@@ -20,7 +20,7 @@ def main():
         print("settings.py is not a file")
         exit(1)
 
-    environment = os.environ.get("HNAC_API_ENVIRONMENT", "production")
+    environment = os.environ.get("API_ENVIRONMENT", "production")
 
     app = create_app(environment, configuration_file_path)
 

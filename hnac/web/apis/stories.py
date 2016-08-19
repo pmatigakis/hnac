@@ -15,8 +15,8 @@ class Stories(Resource):
 
         config = current_app.config
 
-        server = couchdb.Server(config["HNAC_COUCHDB_SERVER"])
-        db = server[config["HNAC_COUCHDB_DATABASE"]]
+        server = couchdb.Server(config["COUCHDB_SERVER"])
+        db = server[config["COUCHDB_DATABASE"]]
 
         stories = []
 
@@ -34,8 +34,8 @@ class StoryDetails(Resource):
     def get(self, story_id):
         config = current_app.config
 
-        server = couchdb.Server(config["HNAC_COUCHDB_SERVER"])
-        db = server[config["HNAC_COUCHDB_DATABASE"]]
+        server = couchdb.Server(config["COUCHDB_SERVER"])
+        db = server[config["COUCHDB_DATABASE"]]
 
         doc_id = "hackernews/item/{}".format(story_id)
 

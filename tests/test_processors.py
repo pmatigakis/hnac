@@ -48,9 +48,9 @@ class CouchDBStorageTests(TestCase):
         DATABASE_NAME = "test_database"
 
         config = {
-            "HNAC_COUCHDB_SERVER": HOST,
-            "HNAC_COUCHDB_DATABASE": DATABASE_NAME,
-            "HNAC_CRAWLER_STORY_UPDATE_DELTA": UPDATE_DELTA
+            "COUCHDB_SERVER": HOST,
+            "COUCHDB_DATABASE": DATABASE_NAME,
+            "CRAWLER_STORY_UPDATE_DELTA": UPDATE_DELTA
         }
 
         processor = CouchDBStorage()

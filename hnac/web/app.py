@@ -24,10 +24,10 @@ def create_app(environment="production", settings_module=None):
     if settings_module:
         app.config.from_pyfile(settings_module)
 
-    if app.config["HNAC_API_ENABLE_LOGGING"]:
-        log_level = app.config["HNAC_API_LOG_LEVEL"]
+    if app.config["API_ENABLE_LOGGING"]:
+        log_level = app.config["API_LOG_LEVEL"]
 
-        log_format = app.config["HNAC_API_LOG_FORMAT"]
+        log_format = app.config["API_LOG_FORMAT"]
 
         formatter = logging.Formatter(log_format)
 
@@ -37,13 +37,13 @@ def create_app(environment="production", settings_module=None):
 
         app.logger.addHandler(console_handler)
 
-        log_file = app.config["HNAC_API_LOG_FILE"]
+        log_file = app.config["API_LOG_FILE"]
 
         file_handler = RotatingFileHandler(
             log_file,
             mode="a",
-            maxBytes=app.config["HNAC_API_LOG_FILE_SIZE"],
-            backupCount=app.config["HNAC_API_LOG_FILE_COUNT"]
+            maxBytes=app.config["API_LOG_FILE_SIZE"],
+            backupCount=app.config["API_LOG_FILE_COUNT"]
         )
 
         file_handler.setFormatter(formatter)
@@ -53,7 +53,7 @@ def create_app(environment="production", settings_module=None):
 
         app.logger.setLevel(log_level)
 
-    db = app.config["HNAC_DB"]
+    db = app.config["DB"]
 
     engine = create_engine(db)
 

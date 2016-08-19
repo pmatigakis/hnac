@@ -15,8 +15,8 @@ blueprint = Blueprint("frontend", __name__)
 def index():
     config = current_app.config
 
-    server = couchdb.Server(config["HNAC_COUCHDB_SERVER"])
-    db = server[config["HNAC_COUCHDB_DATABASE"]]
+    server = couchdb.Server(config["COUCHDB_SERVER"])
+    db = server[config["COUCHDB_DATABASE"]]
 
     latest_stories = []
 
@@ -24,13 +24,13 @@ def index():
 
     for story in result.rows:
         story = {
-            "by": story.doc["by"],
-            "id": story.doc["id"],
-            "time": story.doc["time"],
-            "title": story.doc["title"],
-            "url": story.doc["url"],
-            "score": story.doc["score"],
-            "descendants": story.doc["descendants"],
+            "by": story.doc["data"]["by"],
+            "id": story.doc["data"]["id"],
+            "time": story.doc["data"]["time"],
+            "title": story.doc["data"]["title"],
+            "url": story.doc["data"]["url"],
+            "score": story.doc["data"]["score"],
+            "descendants": story.doc["data"]["descendants"],
         }
 
         latest_stories.append(story)

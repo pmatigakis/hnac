@@ -11,5 +11,5 @@ class CreateDatabase(Command):
     def run(self):
         config = current_app.config
 
-        engine = create_engine(config["HNAC_DB"])
+        engine = create_engine(config["DB"])
         Base.metadata.create_all(engine)
