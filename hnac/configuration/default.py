@@ -36,3 +36,5 @@ SOURCE = HackernewsStories
 PROCESSORS = [
     CouchDBStorage
 ]
+
+PROPAGATE_EXCEPTIONS = True
