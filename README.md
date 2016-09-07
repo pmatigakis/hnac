@@ -13,16 +13,41 @@ Install the package
 Usage
 =====
 
-Create the configuration file
+Create the configuration file *settings.py* and set the variables for the sqlite
+database and the Couchdb database
 
-    hnac_create_configuration
+```python
+DB = "sqlite:////path/to/database/hnac.db"
 
-Open the *hnac.ini* file and adjust the settings 
+COUCHDB_SERVER = "http://localhost:5984"
+COUCHDB_DATABASE = "hnac"
+```
 
-Start the crawler
+Initialize the database
 
-    hnac_start_crawler
+```
+hnac initdb
+```
+
+Create a user so that it is possible to access the API
+
+```
+hnac users create --username username --password user_password
+```
 
 Start the API server
 
-    hnac_start_api_server
+```
+hnac runserver
+```
+
+You can crawl hacker news using the *crawl* command. You should create a cron
+job that will execute this command in a time interval of your choosing
+
+```
+hnac crawl
+```
+
+Api
+===
+TODO
