@@ -1,3 +1,8 @@
+Introduction
+============
+
+Hnac is a crawler for the hackernews firebase API.
+
 Installation
 ============
 
