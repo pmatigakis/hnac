@@ -216,6 +216,38 @@ class JobResultTests(TestCase):
         self.assertEqual(report_object.num_processed_items, 12)
         self.assertTrue(report_object.failed)
 
+    def test_get_latest(self):
+        session = self.Session()
+
+        job_1 = jobs.Job(None, None, None)
+        job_1.processed_item_count = 5
+        job_1.failed = True
+        job_1.id = "job_1_uuid"
+        job_1_start_time = datetime(2016, 5, 6, 12, 0, 0)
+        job_1_end_time = job_1_start_time + timedelta(seconds=40)
+        report_1 = jobs.Report(job_1, job_1_start_time, job_1_end_time)
+
+        Report.save_report(session, report_1)
+
+        job_2 = jobs.Job(None, None, None)
+        job_2.processed_item_count = 11
+        job_2.failed = False
+        job_2.id = "job_2_uuid"
+        job_2_start_time = datetime(2016, 5, 6, 15, 0, 0)
+        job_2_end_time = job_1_start_time + timedelta(seconds=40)
+        report_2 = jobs.Report(job_2, job_2_start_time, job_2_end_time)
+
+        Report.save_report(session, report_2)
+
+        session.commit()
+
+        latest_reports = Report.get_latest(session)
+
+        self.assertEqual(len(latest_reports), 2)
+
+        self.assertEqual(latest_reports[0].job_id, "job_2_uuid")
+        self.assertEqual(latest_reports[1].job_id, "job_1_uuid")
+
 
 if __name__ == '__main__':
     main()

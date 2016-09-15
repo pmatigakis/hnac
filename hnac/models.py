@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, Sequence
+from sqlalchemy import (Column, String, Integer, DateTime, Boolean, Sequence,
+                        desc)
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
@@ -89,3 +90,9 @@ class Report(Base):
         session.add(report_object)
 
         return report_object
+
+    @classmethod
+    def get_latest(cls, session, count=10):
+        return session.query(cls)\
+                      .order_by(desc(cls.started_at))\
+                      .limit(count).all()
