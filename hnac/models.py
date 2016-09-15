@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, String, Integer, DateTime, Boolean
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, Sequence
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
@@ -13,7 +13,8 @@ Base = declarative_base()
 class User(Base, UserMixin):
     __tablename__ = "users"
 
-    id = Column(Integer, nullable=False, primary_key=True)
+    id = Column(
+        Integer, Sequence("users_id_seq"), nullable=False, primary_key=True)
     username = Column(String(40), nullable=False, unique=True)
     password = Column(String(256), nullable=False)
     registered_at = Column(DateTime(timezone=False), nullable=False)

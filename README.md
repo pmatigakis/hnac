@@ -18,20 +18,21 @@ Install the package
 Usage
 =====
 
-Create the configuration file *settings.py* and set the variables for the sqlite
+Create the configuration file *settings.py* and set the variables for the Postgresql
 database and the Couchdb database
 
 ```python
-DB = "sqlite:////path/to/database/hnac.db"
+DB = "postgresql+psycopg2://username:password@localhost:5432/hnac"
 
 COUCHDB_SERVER = "http://localhost:5984"
 COUCHDB_DATABASE = "hnac"
 ```
 
-Initialize the database
+Edit the alembic.ini file and set the *sqlalchemy.url* variable to point to your
+database. Run the migrations.
 
 ```
-hnac initdb
+alembic upgrade head
 ```
 
 Create a user so that it is possible to access the API
