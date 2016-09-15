@@ -14,7 +14,7 @@ setup(
         "python-firebase==1.2",
         "SQLAlchemy==1.0.13",
         "Flask==0.11.1",
-        "marshmallow==2.9.1",
+        "marshmallow==2.10.1",
         "Flask-Script==2.0.5",
         "Flask-Login==0.3.2",
         "Flask-WTF==0.12",
