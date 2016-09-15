@@ -62,3 +62,30 @@ class User(Base, UserMixin):
 
     def change_password(self, password):
         self.password = generate_password_hash(password)
+
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id = Column(Integer, Sequence("reports_id_seq"),
+                nullable=False, primary_key=True)
+
+    job_id = Column(String(32), nullable=False)
+    started_at = Column(DateTime(timezone=False), nullable=False)
+    completed_at = Column(DateTime(timezone=False), nullable=False)
+    failed = Column(Boolean, nullable=False, default=False)
+    num_processed_items = Column(Integer, nullable=False)
+
+    @classmethod
+    def save_report(cls, session, report):
+        report_object = cls(
+            job_id=report.job.id,
+            started_at=report.start_time,
+            completed_at=report.end_time,
+            failed=report.job.failed,
+            num_processed_items=report.job.processed_item_count
+        )
+
+        session.add(report_object)
+
+        return report_object

@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta
 from unittest import TestCase, main
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from hnac.models import Base, User
+from hnac.models import Base, User, Report as Report
+from hnac import jobs
 
 
 class UserCreationTests(TestCase):
@@ -166,6 +168,53 @@ class UserAuthenticationTests(TestCase):
         user = User.authenticate(session, self.unknown_user, self.password)
 
         self.assertIsNone(user)
+
+
+class JobResultTests(TestCase):
+    def setUp(self):
+        self.engine = create_engine("sqlite:///:memory:")
+
+        Base.metadata.create_all(self.engine)
+
+        self.Session = scoped_session(sessionmaker(bind=self.engine))
+
+        session = self.Session()
+
+        self.unknown_user = "unknown_user"
+        self.username = "user1"
+        self.password = "password"
+        self.user = User.create(session, self.username, self.password)
+        session.commit()
+
+        session.close()
+
+    def tearDown(self):
+        self.Session.remove()
+
+    def test_save_job_result(self):
+        session = self.Session()
+
+        job = jobs.Job(None, None, None)
+        job.processed_item_count = 12
+        job.failed = True
+
+        start_time = datetime(2016, 04, 05, 12, 0, 0)
+        end_time = start_time + timedelta(seconds=50)
+        report = jobs.Report(job, start_time, end_time)
+
+        report_object = Report.save_report(session, report)
+
+        self.assertIsNotNone(report_object)
+        self.assertIsNone(report_object.id)
+
+        session.commit()
+
+        self.assertIsNotNone(report_object.id)
+        self.assertEqual(report_object.job_id, job.id)
+        self.assertEqual(report_object.started_at, start_time)
+        self.assertEqual(report_object.completed_at, end_time)
+        self.assertEqual(report_object.num_processed_items, 12)
+        self.assertTrue(report_object.failed)
 
 
 if __name__ == '__main__':
