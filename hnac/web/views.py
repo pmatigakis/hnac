@@ -4,7 +4,7 @@ import couchdb
 
 from hnac.web import session
 from hnac.web.forms import LoginForm
-from hnac.models import User
+from hnac.models import User, Report
 
 
 blueprint = Blueprint("frontend", __name__)
@@ -35,9 +35,12 @@ def index():
 
         latest_stories.append(story)
 
+    latest_reports = Report.get_latest(session)
+
     return render_template("index.html",
                            story_count=result.total_rows,
-                           latest_stories=latest_stories)
+                           latest_stories=latest_stories,
+                           latest_reports=latest_reports)
 
 
 @blueprint.route("/login", methods=["GET", "POST"])

@@ -24,5 +24,25 @@
             <br />
         {% endfor %}
     </div>
+
+    <h3>Latest reports</h3>
+    <div>
+        <table>
+            <tr>
+                <th>Job id</th>
+                <th>Number of processed items</th>
+                <th>Started at</th>
+                <th>Completed at</th>
+            </tr>
+            {% for report in latest_reports %}
+                <tr>
+                    <td>{{ report.job_id }}</td>
+                    <td>{{ report.num_processed_items }}</td>
+                    <td>{{ report.started_at }}</td>
+                    <td>{{ report.completed_at }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 </body>
 </html>
