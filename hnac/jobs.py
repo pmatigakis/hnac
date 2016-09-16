@@ -67,6 +67,6 @@ class Job(object):
             for processor in self._processors:
                 processor.job_finished(self)
 
-        end_time = datetime.now()
+        end_time = datetime.utcnow()
 
         return Report(self, start_time, end_time)
