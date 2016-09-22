@@ -1,28 +1,27 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Hackernews crawler</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-    <h1>Hackernews crawler</h1>
+{% block title %}Hackernews crawler - Login{% endblock %}
 
-	<form method="POST">
-	    {{ form.csrf_token }}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Hackernews crawler</h1>
 
-	    {{ form.username.label }}
-	    {{ form.username(size=20) }}
+            <form method="POST">
+                {{ form.csrf_token }}
 
-        <br />
+                <div class="form-group">
+                    {{ form.username.label }}
+                    {{ form.username(size=20) }}
+                </div>
 
-	    {{ form.password.label }}
-	    {{ form.password(size=20) }}
+                <div class="form-group">
+                    {{ form.password.label }}
+                    {{ form.password(size=20) }}
+                </div>
 
-        <br />
- 
-		<input type="submit" value="Login">
-	</form>
-
-</body>
-</html>
+                <button type="submit" class="btn btn-default">Submit</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

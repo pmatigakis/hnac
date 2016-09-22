@@ -41,8 +41,5 @@ setup(
       
     zip_safe=False,
 
-    include_package_data=True,
-    package_data={
-      'hnac': ['web/templates/*.html'],
-    }
+    include_package_data=True
 )

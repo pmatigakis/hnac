@@ -1,0 +1,2 @@
+recursive-include hnac/web/static *
+recursive-include hnac/web/templates *

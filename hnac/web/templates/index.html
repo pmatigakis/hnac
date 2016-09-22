@@ -1,48 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Hackernews crawler</title>
-</head>
-<body>
-    <a href="{{ url_for('frontend.logout') }}">Logout</a>
+{% extends 'base.html' %}
 
-    <h1>Hackernews crawler</h1>
+{% block title %}Hackernews crawler{% endblock %}
 
-    <p>Total stories: {{ story_count }}</p>
-    
-    <h3>Latest stories</h3>
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills">
+                <li role="presentation"><a href="{{ url_for('frontend.logout') }}">Logout</a></li>
+            </ul>
 
-    <div>
-        {% for story in latest_stories %}
-            <div>{{ story.title }}</div>
-            <div><a href="{{ story['url'] }}">{{ story["url"] }}</a></div>
-            <div><a href="https://news.ycombinator.com/user?id={{ story['by'] }}">{{ story["by"] }}</a> |
-                 score {{ story["score"] }} |
-                 <a href="https://news.ycombinator.com/item?id={{ story['id'] }}">comments {{ story["descendants"] }}</a> |
-                 {{ story["time"] }}</div>
-            <br />
-        {% endfor %}
+            <h1>Hackernews crawler</h1>
+        </div>
     </div>
 
-    <h3>Latest reports</h3>
-    <div>
-        <table>
-            <tr>
-                <th>Job id</th>
-                <th>Number of processed items</th>
-                <th>Started at</th>
-                <th>Completed at</th>
-            </tr>
-            {% for report in latest_reports %}
-                <tr>
-                    <td>{{ report.job_id }}</td>
-                    <td>{{ report.num_processed_items }}</td>
-                    <td>{{ report.started_at }}</td>
-                    <td>{{ report.completed_at }}</td>
-                </tr>
-            {% endfor %}
-        </table>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Total stories: {{ story_count }}</p>
+
+            <h3>Latest stories</h3>
+
+            <div>
+                {% for story in latest_stories %}
+                    <div>{{ story.title }}</div>
+                    <div><a href="{{ story['url'] }}">{{ story["url"] }}</a></div>
+                    <div><a href="https://news.ycombinator.com/user?id={{ story['by'] }}">{{ story["by"] }}</a> |
+                         score {{ story["score"] }} |
+                        <a href="https://news.ycombinator.com/item?id={{ story['id'] }}">comments {{ story["descendants"] }}</a> |
+                        {{ story["time"] }}</div>
+                    <br />
+                {% endfor %}
+            </div>
+        </div>
     </div>
-</body>
-</html>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Latest reports</h3>
+            <div>
+                <table class="table">
+                    <tr>
+                        <th>Job id</th>
+                        <th>Number of processed items</th>
+                        <th>Started at</th>
+                        <th>Completed at</th>
+                    </tr>
+                    {% for report in latest_reports %}
+                        <tr>
+                            <td>{{ report.job_id }}</td>
+                            <td>{{ report.num_processed_items }}</td>
+                            <td>{{ report.started_at }}</td>
+                            <td>{{ report.completed_at }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
