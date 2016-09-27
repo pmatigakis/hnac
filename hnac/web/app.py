@@ -64,6 +64,7 @@ def create_app(environment="production", settings_module=None):
         session.remove()
 
     login_manager.init_app(app)
+    login_manager.login_view = "frontend.login"
 
     jwt.authentication_callback = authenticate
     jwt.identity_callback = identity
