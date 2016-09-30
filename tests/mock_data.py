@@ -1,3 +1,6 @@
+from hnac.models import User
+
+
 story_1_data = {
     "by": "eloy",
     "descendants": 1,
@@ -20,3 +23,9 @@ story_2_data = {
     "type": "story",
     "id": 12299134
 }
+
+
+def load_mock_data(session):
+    user = User.create(session, "user1", "user1password")
+
+    session.add(user)

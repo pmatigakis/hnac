@@ -1,4 +1,3 @@
-from datetime import datetime
 from os.path import abspath, dirname, join
 from unittest import TestCase, main
 
@@ -49,8 +48,7 @@ class DeleteAPIUserTests(TestCase):
         self.username = "user1"
         self.password = "password"
 
-        user = User(username=self.username, password=self.password,
-                    registered_at=datetime.utcnow(), active=True)
+        user = User.create(session, self.username, self.password)
 
         session.add(user)
         session.commit()
@@ -79,8 +77,7 @@ class ChangeAPIUserPasswordTests(TestCase):
         self.username = "user1"
         self.password = "password"
 
-        user = User(username=self.username, password=self.password,
-                    registered_at=datetime.utcnow(), active=True)
+        user = User.create(session, self.username, self.password)
         session.add(user)
         session.commit()
 

@@ -7,7 +7,8 @@ from flask_admin import Admin
 from hnac.web import SessionMaker, session
 from hnac.web.apis import api_v1
 from hnac.web import views, jwt
-from hnac.web.authentication import login_manager, authenticate, identity
+from hnac.web.authentication import (login_manager, authenticate, identity,
+                                     payload_handler)
 from hnac.models import User, Report
 from hnac.web.admin import (ReportModelView, UserModelView,
                             AuthenticatedIndexView)
@@ -72,6 +73,8 @@ def create_app(environment="production", settings_module=None):
 
     jwt.authentication_callback = authenticate
     jwt.identity_callback = identity
+    jwt.jwt_payload_callback = payload_handler
+
     jwt.init_app(app)
 
     admin = Admin(app, name="admin", template_mode='bootstrap3',

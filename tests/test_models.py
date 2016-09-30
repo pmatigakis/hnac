@@ -33,6 +33,7 @@ class UserCreationTests(TestCase):
         self.assertIsNotNone(user.password)
         self.assertTrue(user.active)
         self.assertIsNotNone(user.registered_at)
+        self.assertIsNotNone(user.jti)
 
         session.close()
 
@@ -111,6 +112,7 @@ class UserPasswordManagementTests(TestCase):
 
         user = User.get_by_username(session, self.username)
 
+        original_jti = user.jti
         original_password = user.password
 
         new_password = "new_{}".format(self.password)
@@ -121,6 +123,7 @@ class UserPasswordManagementTests(TestCase):
         self.assertIsNotNone(user.password)
 
         self.assertNotEqual(user.password, original_password)
+        self.assertNotEqual(user.jti, original_jti)
 
         session.close()
 
@@ -138,8 +141,11 @@ class UserAuthenticationTests(TestCase):
         self.unknown_user = "unknown_user"
         self.username = "user1"
         self.password = "password"
-        self.user = User.create(session, self.username, self.password)
+        user = User.create(session, self.username, self.password)
         session.commit()
+
+        self.user_id = user.id
+        self.jti = user.jti
 
         session.close()
 
@@ -166,6 +172,40 @@ class UserAuthenticationTests(TestCase):
         session = self.Session()
 
         user = User.authenticate(session, self.unknown_user, self.password)
+
+        self.assertIsNone(user)
+
+    def test_reset_user_token_jti(self):
+        session = self.Session()
+        user = User.get_by_username(session, self.username)
+
+        original_jti = user.jti
+
+        user.reset_token_identifier()
+
+        self.assertNotEqual(user.jti, original_jti)
+
+    def test_authenticate_using_jwt(self):
+        session = self.Session()
+
+        user = User.authenticate_using_jwt(session, self.user_id, self.jti)
+
+        self.assertIsNotNone(user)
+        self.assertEqual(user.jti, self.jti)
+        self.assertEqual(user.id, self.user_id)
+
+    def test_fail_to_authenticate_using_jwt_with_invalid_user_id(self):
+        session = self.Session()
+
+        user = User.authenticate_using_jwt(session, 1234, self.jti)
+
+        self.assertIsNone(user)
+
+    def test_fail_to_authenticate_using_jwt_with_invalid_jti(self):
+        session = self.Session()
+
+        user = User.authenticate_using_jwt(
+            session, self.user_id, "invalid-jti")
 
         self.assertIsNone(user)
 

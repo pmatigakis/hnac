@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import uuid4
 
 from sqlalchemy import (Column, String, Integer, DateTime, Boolean, Sequence,
                         desc)
@@ -20,6 +21,7 @@ class User(Base, UserMixin):
     password = Column(String(256), nullable=False)
     registered_at = Column(DateTime(timezone=False), nullable=False)
     active = Column(Boolean, nullable=False)
+    jti = Column(String(32), nullable=False)
 
     @classmethod
     def get_by_username(cls, session, username):
@@ -30,7 +32,8 @@ class User(Base, UserMixin):
         user = cls(username=username,
                    password=generate_password_hash(password),
                    active=active,
-                   registered_at=datetime.utcnow())
+                   registered_at=datetime.utcnow(),
+                   jti=uuid4().hex)
 
         session.add(user)
 
@@ -57,12 +60,20 @@ class User(Base, UserMixin):
 
         return user
 
+    @classmethod
+    def authenticate_using_jwt(cls, session, user_id, jti):
+        return session.query(User).filter_by(id=user_id, jti=jti).one_or_none()
+
     @property
     def is_active(self):
         return self.active
 
     def change_password(self, password):
+        self.reset_token_identifier()
         self.password = generate_password_hash(password)
+
+    def reset_token_identifier(self):
+        self.jti = uuid4().hex
 
 
 class Report(Base):
