@@ -72,7 +72,7 @@ class ModelTestCaseWithMockData(ModelTestCase):
         session.close()
 
 
-class CommandTestCase(TestCase):
+class WebTestCase(TestCase):
     def setUp(self):
         settings_path = join(dirname(abspath(__file__)), "settings.py")
         self.app = create_app("testing", settings_path)
@@ -86,6 +86,10 @@ class CommandTestCase(TestCase):
         Base.metadata.drop_all(engine)
 
         session.remove()
+
+
+class CommandTestCase(WebTestCase):
+    pass
 
 
 class CommandTestCaseWithMockData(CommandTestCase):

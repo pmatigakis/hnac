@@ -11,19 +11,10 @@ from hnac.models import Base, Report as ReportModel
 from hnac.web import session
 from hnac.jobs import Report
 
+from common import WebTestCase
 
-class CrawlTests(TestCase):
-    def setUp(self):
-        settings_path = join(dirname(abspath(__file__)), "settings.py")
-        self.app = create_app("testing", settings_path)
 
-        engine = create_engine("sqlite:///test.db")
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-
-    def tearDown(self):
-        session.remove()
-
+class CrawlTests(WebTestCase):
     @patch("hnac.cli.commands.crawler.create_hackernews_api_crawler_job")
     def test_run(self, mock):
         class MockJob(object):
