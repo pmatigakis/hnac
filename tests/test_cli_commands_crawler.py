@@ -1,13 +1,10 @@
 from datetime import datetime, timedelta
-from unittest import TestCase, main
-from os.path import abspath, dirname, join
+from unittest import main
 
-from sqlalchemy import create_engine
 from mock import patch
 
-from hnac.web.app import create_app
 from hnac.cli.commands.crawler import Crawl
-from hnac.models import Base, Report as ReportModel
+from hnac.models import Report as ReportModel
 from hnac.web import session
 from hnac.jobs import Report
 

@@ -1,14 +1,9 @@
-from unittest import TestCase, main
-from os.path import join, dirname, abspath
+from unittest import main
 import json
 
-from sqlalchemy import create_engine
-
-from hnac.models import User, Base
-from hnac.web.app import create_app
+from hnac.models import User
 from hnac.web import session
 
-from mock_data import load_mock_data
 from common import WebTestCaseWithUserAccount
 
 
@@ -18,7 +13,8 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
             "Content-Type": "application/json"
         }
 
-        data = json.dumps({"username": self.test_user_username, "password": self.test_user_password})
+        data = json.dumps({"username": self.test_user_username,
+                           "password": self.test_user_password})
 
         response = self.client.post("/auth", data=data, headers=headers)
 
@@ -33,7 +29,8 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
             "Content-Type": "application/json"
         }
 
-        data = json.dumps({"username": self.test_user_username, "password": "invalid-pass"})
+        data = json.dumps({"username": self.test_user_username,
+                           "password": "invalid-pass"})
 
         response = self.client.post("/auth", data=data, headers=headers)
 
@@ -54,7 +51,8 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
             "Content-Type": "application/json"
         }
 
-        data = json.dumps({"username": "user100", "password": self.test_user_password})
+        data = json.dumps({"username": "user100",
+                           "password": self.test_user_password})
 
         response = self.client.post("/auth", data=data, headers=headers)
 
@@ -73,7 +71,8 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
 
 class ProtectedAPIEndpointAccessTests(WebTestCaseWithUserAccount):
     def test_access_protected_endpoint(self):
-        token = self.authenticate_using_jwt(self.test_user_username, self.test_user_password)
+        token = self.authenticate_using_jwt(self.test_user_username,
+                                            self.test_user_password)
 
         client = self.app.test_client()
 
@@ -86,7 +85,8 @@ class ProtectedAPIEndpointAccessTests(WebTestCaseWithUserAccount):
         self.assertEqual(response.status_code, 200)
 
     def test_fail_to_access_protected_endpoint_with_invalidated_token(self):
-        token = self.authenticate_using_jwt(self.test_user_username, self.test_user_password)
+        token = self.authenticate_using_jwt(self.test_user_username,
+                                            self.test_user_password)
 
         with self.app.app_context():
             user = User.get_by_username(session, "user1")

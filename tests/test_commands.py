@@ -1,16 +1,14 @@
-from os.path import abspath, dirname, join
-from unittest import TestCase, main
+from unittest import main
 
 from werkzeug.security import check_password_hash
-from sqlalchemy import create_engine
 
 from hnac.cli.commands.users import (CreateAPIUser, DeleteAPIUser,
                                      ChangeAPIUserPassword)
-from hnac.web.app import create_app
 from hnac.web import session
-from hnac.models import User, Base
+from hnac.models import User
 
 from common import CommandTestCase, CommandTestCaseWithMockData
+
 
 class CreateAPIUserTests(CommandTestCase):
     def test_create_user(self):

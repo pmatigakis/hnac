@@ -40,6 +40,7 @@ class ModelTestCaseWithMockData(ModelTestCase):
 
         user = User.create(session, self.test_user_username,
                            self.test_user_password)
+        user.id = 1
 
         job_1 = jobs.Job(None, None, None)
         job_1.processed_item_count = 5
@@ -115,7 +116,8 @@ class WebTestCaseWithUserAccount(WebTestCase):
         self.test_user_username = "user1"
         self.test_user_password = "password"
 
-        user1 = User.create(session, self.test_user_username, self.test_user_password)
+        user1 = User.create(session, self.test_user_username,
+                            self.test_user_password)
 
         try:
             session.commit()
