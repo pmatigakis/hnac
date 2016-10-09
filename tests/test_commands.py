@@ -10,16 +10,9 @@ from hnac.web.app import create_app
 from hnac.web import session
 from hnac.models import User, Base
 
+from common import CommandTestCase, CommandTestCaseWithMockData
 
-class CreateAPIUserTests(TestCase):
-    def setUp(self):
-        settings_path = join(dirname(abspath(__file__)), "settings.py")
-        self.app = create_app("testing", settings_path)
-
-        engine = create_engine("sqlite:///test.db")
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-
+class CreateAPIUserTests(CommandTestCase):
     def test_create_user(self):
         USERNAME = "user1"
         PASSWORD = "password"
@@ -36,65 +29,34 @@ class CreateAPIUserTests(TestCase):
         self.assertTrue(check_password_hash(user.password, PASSWORD))
 
 
-class DeleteAPIUserTests(TestCase):
-    def setUp(self):
-        settings_path = join(dirname(abspath(__file__)), "settings.py")
-        self.app = create_app("testing", settings_path)
-
-        engine = create_engine("sqlite:///test.db")
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-
-        self.username = "user1"
-        self.password = "password"
-
-        user = User.create(session, self.username, self.password)
-
-        session.add(user)
-        session.commit()
-
+class DeleteAPIUserTests(CommandTestCaseWithMockData):
     def test_delete_user(self):
         command = DeleteAPIUser()
 
-        command.run(self.username)
+        command.run(self.test_user_username)
 
         user = session.query(User)\
-                      .filter_by(username=self.username)\
+                      .filter_by(username=self.test_user_username)\
                       .one_or_none()
 
         self.assertIsNone(user)
 
 
-class ChangeAPIUserPasswordTests(TestCase):
-    def setUp(self):
-        settings_path = join(dirname(abspath(__file__)), "settings.py")
-        self.app = create_app("testing", settings_path)
-
-        engine = create_engine("sqlite:///test.db")
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-
-        self.username = "user1"
-        self.password = "password"
-
-        user = User.create(session, self.username, self.password)
-        session.add(user)
-        session.commit()
-
+class ChangeAPIUserPasswordTests(CommandTestCaseWithMockData):
     def test_change_user_password(self):
         command = ChangeAPIUserPassword()
 
         new_password = "password2"
 
-        command.run(self.username, new_password)
+        command.run(self.test_user_username, new_password)
 
         user = session.query(User)\
-                      .filter_by(username=self.username)\
+                      .filter_by(username=self.test_user_username)\
                       .one_or_none()
 
         self.assertIsNotNone(user)
         self.assertIsNotNone(user.id)
-        self.assertEqual(user.username, self.username)
+        self.assertEqual(user.username, self.test_user_username)
         self.assertTrue(check_password_hash(user.password, new_password))
 
 
