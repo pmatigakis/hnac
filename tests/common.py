@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from os.path import abspath, dirname, join
 from unittest import TestCase
+import json
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -81,32 +82,55 @@ class WebTestCase(TestCase):
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
 
+        self.client = self.app.test_client()
+
     def tearDown(self):
         engine = session.get_bind()
         Base.metadata.drop_all(engine)
 
         session.remove()
 
+    def authenticate_using_jwt(self, username, password):
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        data = json.dumps({"username": username, "password": password})
+
+        response = self.client.post("/auth", data=data, headers=headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.data)
+
+        self.assertIn("access_token", response_data)
+
+        return response_data["access_token"]
+
+
+class WebTestCaseWithUserAccount(WebTestCase):
+    def setUp(self):
+        super(WebTestCaseWithUserAccount, self).setUp()
+
+        self.test_user_username = "user1"
+        self.test_user_password = "password"
+
+        user1 = User.create(session, self.test_user_username, self.test_user_password)
+
+        try:
+            session.commit()
+
+            self.test_user_id = user1.id
+            self.test_user_jti = user1.jti
+        except SQLAlchemyError as e:
+            print e
+            session.rollback()
+            self.fail("failed to load mock data")
+
 
 class CommandTestCase(WebTestCase):
     pass
 
 
-class CommandTestCaseWithMockData(CommandTestCase):
-    def setUp(self):
-        super(CommandTestCaseWithMockData, self).setUp()
-
-        self.test_user_username = "user1"
-        self.test_user_password = "password"
-
-        user = User.create(session, self.test_user_username, self.test_user_password)
-
-        try:
-            session.commit()
-
-            self.test_user_id = user.id
-            self.test_user_jti = user.jti
-        except SQLAlchemyError as e:
-            print e
-            session.rollback()
-            self.fail("failed to load mock data")
+class CommandTestCaseWithMockData(WebTestCaseWithUserAccount):
+    pass
