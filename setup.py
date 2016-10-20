@@ -23,7 +23,8 @@ setup(
         "Flask-JWT==0.3.2",
         "alembic==0.8.8",
         "psycopg2==2.6.2",
-        "Flask-Admin==1.4.2"
+        "Flask-Admin==1.4.2",
+        "uWSGI==2.0.14"
     ],
     
     tests_require=[
