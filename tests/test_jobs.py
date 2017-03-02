@@ -6,7 +6,7 @@ from mock import MagicMock, call
 
 
 class JobTests(TestCase):
-    def test_run_jon(self):
+    def test_run_job(self):
         Source = MagicMock()
         source_instance = Source.return_value
         source_instance.items.return_value = [1, 2, 3]
@@ -16,6 +16,7 @@ class JobTests(TestCase):
         Processor = MagicMock()
         processor_instance = Processor.return_value
         processor_instance.process_item = MagicMock()
+        processor_instance.process_item.return_value = True
         processor_instance.job_started = MagicMock()
         processor_instance.job_finished = MagicMock()
 

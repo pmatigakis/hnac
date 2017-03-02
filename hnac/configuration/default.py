@@ -1,7 +1,5 @@
 import logging
 
-from hnac.processors import CouchDBStorage
-
 
 SECRET_KEY = "secret"
 TESTING = False
@@ -30,8 +28,6 @@ API_LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
 API_ENVIRONMENT = "production"
 
-PROCESSORS = [
-    CouchDBStorage
-]
+PROCESSORS = []
 
 PROPAGATE_EXCEPTIONS = True

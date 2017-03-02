@@ -3,6 +3,7 @@ from logging.handlers import RotatingFileHandler
 
 from hnac.jobs import Job
 from hnac.sources import HackernewsStories
+from hnac.processors import CouchDBStorage
 
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,9 @@ def create_hackernews_api_crawler_job(config):
     source.configure(config)
 
     logger.debug("Initializing data processors")
-    processors = [processor() for processor in config["PROCESSORS"]]
+
+    processors = [CouchDBStorage()]
+    processors.extend([processor() for processor in config["PROCESSORS"]])
 
     for processor in processors:
         processor.configure(config)

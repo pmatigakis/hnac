@@ -45,7 +45,7 @@ class Job(object):
                 for processor in self._processors:
                     result = processor.process_item(self._source, item)
 
-                    if result is None:
+                    if not result:
                         logger.error("Processor didn't process successfully "
                                      "this item")
 

@@ -54,7 +54,7 @@ class CouchDBStorage(Processor):
     def process_item(self, source, item):
         if not is_story_item(item):
             logger.warning("item is not a story object")
-            return item
+            return True
 
         story_id = item["id"]
         doc_id = "hackernews/item/%d" % story_id
@@ -66,7 +66,7 @@ class CouchDBStorage(Processor):
 
             if doc["updated_at"] + self.update_delta > time():
                 logger.debug("Story with id %d doesn't need update", story_id)
-                return item
+                return True
         else:
             doc = {}
 
@@ -78,6 +78,13 @@ class CouchDBStorage(Processor):
         except HTTPError:
             logger.exception("Failed to save story with id to CouchDB %d",
                              story_id)
-            return None
+            return False
 
-        return item
+        return True
+
+
+class DummyProcessor(Processor):
+    def process_item(self, source, item):
+        print(item)
+
+        return True
