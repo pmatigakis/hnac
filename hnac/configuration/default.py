@@ -1,6 +1,5 @@
 import logging
 
-from hnac.sources import HackernewsStories
 from hnac.processors import CouchDBStorage
 
 
@@ -30,8 +29,6 @@ API_LOG_FILE_COUNT = 5
 API_LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
 API_ENVIRONMENT = "production"
-
-SOURCE = HackernewsStories
 
 PROCESSORS = [
     CouchDBStorage
