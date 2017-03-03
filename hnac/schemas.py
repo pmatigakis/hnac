@@ -2,6 +2,9 @@ from marshmallow import Schema, fields
 
 
 def is_story_item(item_data):
+    if not isinstance(item_data, dict):
+        return False
+
     required_fields = set(["id", "type", "by", "descendants",
                            "score", "time", "title", "url"])
 
