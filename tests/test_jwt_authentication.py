@@ -1,6 +1,8 @@
 from unittest import main
 import json
 
+from mock import patch
+
 from hnac.models import User
 from hnac.web import session
 
@@ -70,7 +72,10 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
 
 
 class ProtectedAPIEndpointAccessTests(WebTestCaseWithUserAccount):
-    def test_access_protected_endpoint(self):
+    @patch("hnac.web.apis.stories.Stories._get_stories")
+    def test_access_protected_endpoint(self, get_stories_mock):
+        get_stories_mock.return_value = []
+
         token = self.authenticate_using_jwt(self.test_user_username,
                                             self.test_user_password)
 

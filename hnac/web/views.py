@@ -20,7 +20,8 @@ def index():
 
     latest_stories = []
 
-    result = db.view("_all_docs", limit=5, include_docs=True, descending=True)
+    result = db.view(
+        "stories/by_doc_id", limit=5, include_docs=True, descending=True)
 
     for story in result.rows:
         story = {
