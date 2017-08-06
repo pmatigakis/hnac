@@ -8,11 +8,7 @@ from hnac.web.apis import models
 
 
 class Stories(Resource):
-    @marshal_with(models.story)
-    @jwt_required()
-    def get(self):
-        args = story_list_query_parser.parse_args()
-
+    def _get_stories(self, offset, limit):
         config = current_app.config
 
         server = couchdb.Server(config["COUCHDB_SERVER"])
@@ -20,10 +16,19 @@ class Stories(Resource):
 
         stories = []
 
-        for row in db.view("_all_docs", limit=args.limit,
+        for row in db.view("stories/by_doc_id", limit=limit,
                            include_docs=True, descending=True,
-                           skip=args.offset):
+                           skip=offset):
             stories.append(row.doc["data"])
+
+        return stories
+
+    @marshal_with(models.story)
+    @jwt_required()
+    def get(self):
+        args = story_list_query_parser.parse_args()
+
+        stories = self._get_stories(args.offset, args.limit)
 
         return stories
 

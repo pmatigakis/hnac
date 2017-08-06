@@ -33,9 +33,9 @@ setup(
         "mock==2.0.0"
     ],
 
-    test_suite = 'nose.collector',
+    test_suite='nose.collector',
 
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'hnac=hnac.cli.cli:main'
         ]
