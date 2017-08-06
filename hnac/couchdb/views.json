@@ -1,0 +1,9 @@
+{
+   "_id": "_design/stories",
+   "language": "javascript",
+   "views": {
+       "by_doc_id": {
+           "map": "function(doc) {\n    if(doc.data.type == \"story\"){\n        emit(doc._id, null);\n    }\n}"
+       }
+   }
+}
