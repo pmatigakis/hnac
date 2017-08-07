@@ -5,12 +5,6 @@ SECRET_KEY = "secret"
 TESTING = False
 DEBUG = False
 
-CRAWLER_LOG_FILE = "hnac_crawler.log"
-CRAWLER_ENABLE_LOGGING = False
-CRAWLER_LOG_LEVEL = logging.INFO
-CRAWLER_LOG_FILE_SIZE = 2 ** 24
-CRAWLER_LOG_FILE_COUNT = 5
-CRAWLER_LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 CRAWLER_WAIT_TIME = 1.0
 CRAWLER_BACKOFF_TIME = 1.0
 CRAWLER_ABORT_AFTER = 3
