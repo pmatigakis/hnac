@@ -43,7 +43,11 @@ class Job(object):
         try:
             for item in self._source.items():
                 for processor in self._processors:
-                    result = processor.process_item(self._source, item)
+                    try:
+                        result = processor.process_item(self._source, item)
+                    except Exception:
+                        logger.exception("processor failed to process item")
+                        continue
 
                     if not result:
                         logger.error("Processor didn't process successfully "

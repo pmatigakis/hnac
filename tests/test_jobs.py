@@ -25,6 +25,7 @@ class JobTests(TestCase):
         job = Job(config, source_instance, [processor_instance])
 
         job.run()
+        self.assertFalse(job.failed)
 
         source_instance.job_started.assert_called_once()
         processor_instance.job_started.assert_called_once()
@@ -41,6 +42,25 @@ class JobTests(TestCase):
 
         source_instance.job_finished.assert_called_once()
         processor_instance.job_finished.assert_called_once()
+
+    def test_processor_raised_an_exception_while_processing_item(self):
+        Source = MagicMock()
+        source_instance = Source.return_value
+        source_instance.items.return_value = [1, 2, 3]
+        source_instance.job_started = MagicMock()
+        source_instance.job_finished = MagicMock()
+
+        Processor = MagicMock()
+        processor_instance = Processor.return_value
+        processor_instance.process_item = MagicMock()
+        processor_instance.process_item.side_effect = ValueError
+
+        config = {}
+
+        job = Job(config, source_instance, [processor_instance])
+
+        job.run()
+        self.assertFalse(job.failed)
 
 
 if __name__ == "__main__":
