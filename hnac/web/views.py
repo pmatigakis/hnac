@@ -1,10 +1,15 @@
+import logging
+
 from flask import Blueprint, render_template, redirect, url_for, current_app
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 import couchdb
 
 from hnac.web import session
 from hnac.web.forms import LoginForm
 from hnac.models import User, Report
+
+
+logger = logging.getLogger(__name__)
 
 
 blueprint = Blueprint("frontend", __name__)
@@ -52,9 +57,13 @@ def login():
         username = form.username.data
         password = form.password.data
 
+        logger.info("logging in user %s}", username)
+
         user = User.authenticate(session, username, password)
 
         if not user:
+            logger.warning("failed to authenticate user %s", username)
+
             return render_template("login.html", form=form)
 
         login_user(user)
@@ -65,7 +74,10 @@ def login():
 
 
 @blueprint.route("/logout")
+@login_required
 def logout():
+    logger.info("logging out user %s", current_user.username)
+
     logout_user()
 
     return redirect(url_for("frontend.login"))

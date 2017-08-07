@@ -30,8 +30,10 @@ def create_app(environment="production", settings_module=None):
         app.config.from_pyfile(settings_module)
 
     if app.config["API_ENABLE_LOGGING"]:
-        log_level = app.config["API_LOG_LEVEL"]
+        logger = logging.getLogger("hnac")
+        logger.handlers = []
 
+        log_level = app.config["API_LOG_LEVEL"]
         log_format = app.config["API_LOG_FORMAT"]
 
         formatter = logging.Formatter(log_format)
@@ -40,7 +42,7 @@ def create_app(environment="production", settings_module=None):
         console_handler.setFormatter(formatter)
         console_handler.setLevel(log_level)
 
-        app.logger.addHandler(console_handler)
+        logger.addHandler(console_handler)
 
         log_file = app.config["API_LOG_FILE"]
 
@@ -54,9 +56,9 @@ def create_app(environment="production", settings_module=None):
         file_handler.setFormatter(formatter)
         file_handler.setLevel(log_level)
 
-        app.logger.addHandler(file_handler)
+        logger.addHandler(file_handler)
 
-        app.logger.setLevel(log_level)
+        logger.setLevel(log_level)
 
     db = app.config["DB"]
 

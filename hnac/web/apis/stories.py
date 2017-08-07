@@ -1,3 +1,5 @@
+import logging
+
 from flask import current_app
 from flask_restful import Resource, marshal_with, abort
 import couchdb
@@ -5,6 +7,9 @@ from flask_jwt import jwt_required
 
 from hnac.web.apis.arguments import story_list_query_parser
 from hnac.web.apis import models
+
+
+logger = logging.getLogger(__name__)
 
 
 class Stories(Resource):
@@ -28,6 +33,9 @@ class Stories(Resource):
     def get(self):
         args = story_list_query_parser.parse_args()
 
+        logger.info(
+            "retrieving stories offset=%s limit=%s", args.offset, args.limit)
+
         stories = self._get_stories(args.offset, args.limit)
 
         return stories
@@ -37,6 +45,8 @@ class StoryDetails(Resource):
     @marshal_with(models.story)
     @jwt_required()
     def get(self, story_id):
+        logger.info("retrieving story with id %s", story_id)
+
         config = current_app.config
 
         server = couchdb.Server(config["COUCHDB_SERVER"])
@@ -47,6 +57,8 @@ class StoryDetails(Resource):
         doc = db.get(doc_id)
 
         if not doc:
+            logger.warning("story with id %s doesn't exist", story_id)
+
             abort(
                 404,
                 error="story doesn't exist",

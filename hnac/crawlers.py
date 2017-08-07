@@ -43,11 +43,11 @@ def create_hackernews_api_crawler_job(config):
 
         logger.setLevel(log_level)
 
-    logger.debug("Initializing data source")
+    logger.info("Initializing data source")
     source = HackernewsStories()
     source.configure(config)
 
-    logger.debug("Initializing data processors")
+    logger.info("Initializing data processors")
 
     processors = [CouchDBStorage()]
     processors.extend([
@@ -57,8 +57,10 @@ def create_hackernews_api_crawler_job(config):
     for processor in processors:
         processor.configure(config)
 
+    logger.info("Data processors initialized")
+
     job = Job(config, source, processors)
 
-    logger.info("created job with id %s", job.id)
+    logger.info("Created job with id %s", job.id)
 
     return job

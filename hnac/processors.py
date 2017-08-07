@@ -73,6 +73,8 @@ class CouchDBStorage(Processor):
         doc["updated_at"] = time()
         doc["data"] = item
 
+        logger.info("saving story with id %s to couchdb", story_id)
+
         try:
             self._db[doc_id] = doc
         except HTTPError:
