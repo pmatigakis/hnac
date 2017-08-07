@@ -13,14 +13,14 @@ CRAWLER_STORY_UPDATE_DELTA = 3600
 API_HOST = "127.0.0.1"
 API_PORT = 5000
 
-API_ENABLE_LOGGING = False
-API_LOG_FILE = "hnac_api.log"
-API_LOG_LEVEL = logging.INFO
-API_LOG_FILE_SIZE = 2 ** 24
-API_LOG_FILE_COUNT = 5
-API_LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
+ENABLE_LOGGING = False
+LOG_FILE = "hnac_api.log"
+LOG_LEVEL = logging.INFO
+LOG_FILE_SIZE = 2 ** 24
+LOG_FILE_COUNT = 5
+LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
-API_ENVIRONMENT = "production"
+ENVIRONMENT = "production"
 
 PROCESSORS = []
 

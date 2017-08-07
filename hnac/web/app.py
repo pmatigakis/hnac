@@ -29,12 +29,12 @@ def create_app(environment="production", settings_module=None):
     if settings_module:
         app.config.from_pyfile(settings_module)
 
-    if app.config["API_ENABLE_LOGGING"]:
+    if app.config["ENABLE_LOGGING"]:
         logger = logging.getLogger("hnac")
         logger.handlers = []
 
-        log_level = app.config["API_LOG_LEVEL"]
-        log_format = app.config["API_LOG_FORMAT"]
+        log_level = app.config["LOG_LEVEL"]
+        log_format = app.config["LOG_FORMAT"]
 
         formatter = logging.Formatter(log_format)
 
@@ -44,13 +44,13 @@ def create_app(environment="production", settings_module=None):
 
         logger.addHandler(console_handler)
 
-        log_file = app.config["API_LOG_FILE"]
+        log_file = app.config["LOG_FILE"]
 
         file_handler = RotatingFileHandler(
             log_file,
             mode="a",
-            maxBytes=app.config["API_LOG_FILE_SIZE"],
-            backupCount=app.config["API_LOG_FILE_COUNT"]
+            maxBytes=app.config["LOG_FILE_SIZE"],
+            backupCount=app.config["LOG_FILE_COUNT"]
         )
 
         file_handler.setFormatter(formatter)
