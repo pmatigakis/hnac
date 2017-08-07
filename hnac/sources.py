@@ -86,7 +86,7 @@ class HackernewsStories(Source):
                 sleep(self.backoff_time)
 
     def _get_story_data(self, story_id):
-        logger.debug("Fetching hackernews item %d", story_id)
+        logger.info("Fetching hackernews item %d", story_id)
 
         failure_count = 0
 

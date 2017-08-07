@@ -57,7 +57,7 @@ class Job(object):
 
             logger.info("Finished job with id %s", self.id)
         except (KeyboardInterrupt, SystemExit):
-            logger.info("Job with %s stopped by user or system", self.id)
+            logger.warning("Job with %s stopped by user or system", self.id)
         except JobExecutionError:
             logger.error("Failed to execute job with id %s", self.id)
             self.failed = True
