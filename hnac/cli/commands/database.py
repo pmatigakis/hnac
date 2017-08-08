@@ -24,7 +24,7 @@ class CreateDatabase(Command):
 
         stories_view_code = pkg_resources.resource_string(
             "hnac", os.path.join("couchdb", "views.json"))
-        stories_view = json.loads(stories_view_code)
+        stories_view = json.loads(stories_view_code.decode("utf8"))
 
         existing_stories_view = db.get("_design/stories")
         if existing_stories_view is not None:
