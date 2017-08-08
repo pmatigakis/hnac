@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from unittest import main
-
-from mock import patch
+from unittest.mock import patch
 
 from hnac.cli.commands.crawler import Crawl
 from hnac.models import Report as ReportModel

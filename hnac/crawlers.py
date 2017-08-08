@@ -1,5 +1,4 @@
 import logging
-from logging.handlers import RotatingFileHandler
 
 from hnac.jobs import Job
 from hnac.sources import HackernewsStories

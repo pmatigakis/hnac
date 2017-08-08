@@ -1,6 +1,5 @@
 from unittest import TestCase, main
-
-from mock import patch
+from unittest.mock import patch
 
 from hnac.sources import HackernewsStories
 
@@ -22,7 +21,7 @@ def firebase_get(url, *args, **kwargs):
 
 
 class HackernewsStoriesItemRetrieval(TestCase):
-    @patch("hnac.sources.FirebaseApplication")
+    @patch("hnac.sources.firebase.FirebaseApplication")
     def test_get_next_item(self, mocked_firebase_application):
         instance = mocked_firebase_application.return_value
         instance.get.side_effect = firebase_get

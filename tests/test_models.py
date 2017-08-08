@@ -140,7 +140,7 @@ class JobResultTests(ModelTestCase):
         job.processed_item_count = 12
         job.failed = True
 
-        start_time = datetime(2016, 04, 05, 12, 0, 0)
+        start_time = datetime(2016, 4, 5, 12, 0, 0)
         end_time = start_time + timedelta(seconds=50)
         report = jobs.Report(job, start_time, end_time)
 

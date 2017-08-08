@@ -1,6 +1,5 @@
 from unittest import TestCase, main
-
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from hnac.processors import CouchDBStorage
 

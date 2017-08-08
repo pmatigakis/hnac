@@ -8,3 +8,4 @@ hnac.egg-info
 temp/
 .idea
 .eggs
+virtualenv/

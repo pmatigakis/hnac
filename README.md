@@ -8,7 +8,7 @@ Installation
 
 Create a virtualenv
 
-    virtualenv --python=python2.7 virtualenv
+    virtualenv --python=python3 virtualenv
     source virtualenv/bin/activate
 
 Install the package

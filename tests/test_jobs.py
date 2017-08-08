@@ -1,8 +1,7 @@
 from unittest import TestCase, main
+from unittest.mock import MagicMock, call
 
 from hnac.jobs import Job
-
-from mock import MagicMock, call
 
 
 class JobTests(TestCase):

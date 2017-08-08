@@ -29,8 +29,7 @@ setup(
     
     tests_require=[
         "nose==1.3.7",
-        "httpretty==0.8.14",
-        "mock==2.0.0"
+        "httpretty==0.8.14"
     ],
 
     test_suite='nose.collector',

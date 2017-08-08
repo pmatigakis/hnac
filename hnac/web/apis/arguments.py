@@ -1,4 +1,4 @@
-from flask_restplus import reqparse
+from flask_restful import reqparse
 
 story_list_query_parser = reqparse.RequestParser()
 story_list_query_parser.add_argument("limit", type=int, default=500)

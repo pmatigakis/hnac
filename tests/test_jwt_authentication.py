@@ -1,7 +1,6 @@
 from unittest import main
+from unittest.mock import patch
 import json
-
-from mock import patch
 
 from hnac.models import User
 from hnac.web import session
@@ -22,7 +21,7 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
 
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.data)
+        response_data = json.loads(response.data.decode("utf8"))
 
         self.assertIn("access_token", response_data)
 
@@ -38,7 +37,7 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
 
         self.assertEqual(response.status_code, 401)
 
-        response_data = json.loads(response.data)
+        response_data = json.loads(response.data.decode("utf8"))
 
         expected_response = {
             u'status_code': 401,
@@ -60,7 +59,7 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
 
         self.assertEqual(response.status_code, 401)
 
-        response_data = json.loads(response.data)
+        response_data = json.loads(response.data.decode("utf8"))
 
         expected_response = {
             u'status_code': 401,
@@ -110,7 +109,7 @@ class ProtectedAPIEndpointAccessTests(WebTestCaseWithUserAccount):
 
         self.assertEqual(response.status_code, 401)
 
-        response_data = json.loads(response.data)
+        response_data = json.loads(response.data.decode("utf8"))
 
         expected_response = {
             u'description': u'User does not exist',

@@ -1,6 +1,5 @@
 from unittest import main
-
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 
 from hnac.web.authentication import (load_user, authenticate, identity,
                                      payload_handler)

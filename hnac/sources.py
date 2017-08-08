@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import logging
 from time import time, sleep
 
-from firebase import FirebaseApplication
+from firebase import firebase
 from requests import RequestException
 
 from hnac.schemas import is_story_item
@@ -45,7 +45,7 @@ class HackernewsStories(Source):
 
         api_endpoint = "https://hacker-news.firebaseio.com"
 
-        self._firebase = FirebaseApplication(api_endpoint, None)
+        self._firebase = firebase.FirebaseApplication(api_endpoint, None)
 
         self._story_ids = None
 

@@ -102,7 +102,7 @@ class WebTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.data)
+        response_data = json.loads(response.data.decode("utf8"))
 
         self.assertIn("access_token", response_data)
 
@@ -125,7 +125,6 @@ class WebTestCaseWithUserAccount(WebTestCase):
             self.test_user_id = user1.id
             self.test_user_jti = user1.jti
         except SQLAlchemyError as e:
-            print e
             session.rollback()
             self.fail("failed to load mock data")
 
