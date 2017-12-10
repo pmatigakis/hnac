@@ -39,6 +39,27 @@ class Job(object):
         for processor in self._processors:
             processor.job_finished(self)
 
+    def _process_item(self, processor, item):
+        try:
+            result = processor.process_item(self._source, item)
+        except Exception:
+            logger.exception("processor failed to process item")
+            return
+
+        if not result:
+            logger.error("Processor didn't process successfully "
+                         "this item")
+
+    def _process_item_with_processors(self, item):
+        for processor in self._processors:
+            self._process_item(processor, item)
+
+        self.processed_item_count += 1
+
+    def _retrieve_and_process_items(self):
+        for item in self._source.items():
+            self._process_item_with_processors(item)
+
     def run(self):
         logger.info("starting job with id %s", self.id)
 
@@ -49,21 +70,7 @@ class Job(object):
         self._notify_job_started()
 
         try:
-            for item in self._source.items():
-                for processor in self._processors:
-                    try:
-                        result = processor.process_item(self._source, item)
-                    except Exception:
-                        logger.exception("processor failed to process item")
-                        continue
-
-                    if not result:
-                        logger.error("Processor didn't process successfully "
-                                     "this item")
-
-                self.processed_item_count += 1
-
-            logger.info("Finished job with id %s", self.id)
+            self._retrieve_and_process_items()
         except (KeyboardInterrupt, SystemExit):
             logger.warning("Job with %s stopped by user or system", self.id)
         except JobExecutionError:
@@ -76,6 +83,7 @@ class Job(object):
         finally:
             self._notify_job_finished()
 
-        end_time = datetime.utcnow()
+        logger.info("Finished executing job with id %s", self.id)
 
+        end_time = datetime.utcnow()
         return Report(self, start_time, end_time)
