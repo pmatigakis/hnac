@@ -27,6 +27,18 @@ class Job(object):
         self.processed_item_count = 0
         self.failed = False
 
+    def _notify_job_started(self):
+        self._source.job_started(self)
+
+        for processor in self._processors:
+            processor.job_started(self)
+
+    def _notify_job_finished(self):
+        self._source.job_finished(self)
+
+        for processor in self._processors:
+            processor.job_finished(self)
+
     def run(self):
         logger.info("starting job with id %s", self.id)
 
@@ -34,11 +46,7 @@ class Job(object):
         self.processed_item_count = 0
 
         start_time = datetime.utcnow()
-
-        self._source.job_started(self)
-
-        for processor in self._processors:
-            processor.job_started(self)
+        self._notify_job_started()
 
         try:
             for item in self._source.items():
@@ -66,10 +74,7 @@ class Job(object):
 
             self.failed = True
         finally:
-            self._source.job_finished(self)
-
-            for processor in self._processors:
-                processor.job_finished(self)
+            self._notify_job_finished()
 
         end_time = datetime.utcnow()
 
