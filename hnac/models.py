@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import (Column, String, Integer, DateTime, Boolean, Sequence,
-                        desc)
+                        desc, ForeignKey)
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
@@ -107,3 +107,50 @@ class Report(Base):
         return session.query(cls)\
                       .order_by(desc(cls.started_at))\
                       .limit(count).all()
+
+
+class HackernewsUser(Base):
+    __tablename__ = "hackernews_users"
+
+    id = Column(Integer, nullable=False, primary_key=True)
+    username = Column(String(40), nullable=False)
+    created_at = Column(DateTime(timezone=False), nullable=False)
+
+
+class Url(Base):
+    __tablename__ = "urls"
+
+    id = Column(Integer, nullable=False, primary_key=True)
+    url = Column(String(2048), nullable=False)
+    created_at = Column(DateTime(timezone=False))
+
+
+class Story(Base):
+    __tablename__ = "stories"
+
+    id = Column(Integer, nullable=False, primary_key=True)
+    story_id = Column(Integer, nullable=False, unique=True)
+    hackernews_user_id = Column(
+        Integer,
+        ForeignKey(
+            "hackernews_users.id",
+            ondelete="CASCADE",
+            onupdate="CASCADE"
+        ),
+        nullable=False
+    )
+    url_id = Column(
+        Integer,
+        ForeignKey(
+            "urls.id",
+            ondelete="CASCADE",
+            onupdate="CASCADE"
+        ),
+        nullable=False
+    )
+    title = Column(String(512), nullable=False)
+    score = Column(Integer, nullable=False)
+    time = Column(Integer, nullable=False)
+    descendants = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=False), nullable=False)
+    updated_at = Column(DateTime(timezone=False), nullable=False)
