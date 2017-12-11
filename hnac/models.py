@@ -130,7 +130,16 @@ class HackernewsUser(Base):
 
     @classmethod
     def get_by_username(cls, session, username):
-        return session.query(cls).filter_by(username=username).one_or_nonw()
+        return session.query(cls).filter_by(username=username).one_or_none()
+
+    @classmethod
+    def get_or_create_by_username(cls, session, username):
+        user = cls.get_by_username(session, username)
+        if user is None:
+            user = cls.create(session, username)
+            session.add(user)
+
+        return user
 
 
 class Url(Base):
@@ -154,6 +163,15 @@ class Url(Base):
     @classmethod
     def get_by_url(cls, session, url):
         return session.query(cls).filter_by(url=url).one_or_none()
+
+    @classmethod
+    def get_or_create_by_url(cls, session, url):
+        url_object = cls.get_by_url(session, url)
+        if url_object is None:
+            url_object = Url.create(session, url)
+            session.add(url_object)
+
+        return url_object
 
 
 class Story(Base):
@@ -190,10 +208,12 @@ class Story(Base):
     url = relationship("Url")
 
     @classmethod
-    def create(cls, session, user, url, title, score, time, descendants):
+    def create(cls, session, user, url, story_id, title, score, time,
+               descendants):
         story = cls(
             hackernews_user=user,
             url=url,
+            story_id=story_id,
             title=title,
             score=score,
             time=time,
@@ -205,3 +225,7 @@ class Story(Base):
         session.add(story)
 
         return story
+
+    @classmethod
+    def get_by_story_id(cls, session, story_id):
+        return session.query(cls).filter_by(story_id=story_id).one_or_none()

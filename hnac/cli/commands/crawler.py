@@ -10,7 +10,7 @@ class Crawl(Command):
     """Start the crawler"""
 
     def run(self):
-        job = create_hackernews_api_crawler_job(current_app.config)
+        job = create_hackernews_api_crawler_job(current_app.config, session)
 
         report = job.run()
 
