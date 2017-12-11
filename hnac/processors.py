@@ -147,15 +147,15 @@ class SQLAlchemyStorage(Processor):
         else:
             self._update_story(story, item)
 
-        logger.info("processed story with id %s", story.story_id)
-        return True
-
-    def job_finished(self, job):
+        # it is not the most optimal thing to save the story items one at a
+        # time. However for the moment it will do.
         try:
             self._session.commit()
-        except SQLAlchemyError:
-            self._session.rollback()
+            logger.info("processed story with id %s", story.story_id)
 
-            # just log the error and do not raise the exception. We will decide
-            # in the future if this should change
-            logger.exception("failed to save stories to database")
+            return True
+        except SQLAlchemyStorage:
+            self._session.rollback()
+            logger.exception("failed to save story with story id %s", story_id)
+
+            return False

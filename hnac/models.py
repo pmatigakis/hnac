@@ -210,6 +210,9 @@ class Story(Base):
     @classmethod
     def create(cls, session, user, url, story_id, title, score, time,
                descendants):
+
+        created_at = datetime.utcnow()
+
         story = cls(
             hackernews_user=user,
             url=url,
@@ -218,8 +221,8 @@ class Story(Base):
             score=score,
             time=time,
             descendants=descendants,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            created_at=created_at,
+            updated_at=created_at
         )
 
         session.add(story)
