@@ -5,7 +5,7 @@ from unittest.mock import patch
 from hnac.cli.commands.crawler import Crawl
 from hnac.models import Report as ReportModel
 from hnac.web import session
-from hnac.jobs import Report
+from hnac.jobs import JobExecutionResult
 
 from common import WebTestCase
 
@@ -16,14 +16,18 @@ class CrawlTests(WebTestCase):
         class MockJob(object):
             def __init__(self):
                 self.id = "this_is_an_uuid"
-                self.processed_item_count = 13
-                self.failed = True
 
             def run(self):
                 start_time = datetime(2016, 4, 6, 12, 00, 00)
                 end_time = start_time + timedelta(seconds=30)
 
-                return Report(self, start_time, end_time)
+                return JobExecutionResult(
+                    job=self,
+                    start_time=start_time,
+                    end_time=end_time,
+                    failed=True,
+                    processed_item_count=13
+                )
 
         mock.return_value = MockJob()
 

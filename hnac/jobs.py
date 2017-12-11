@@ -9,11 +9,14 @@ from hnac.exceptions import JobExecutionError
 logger = logging.getLogger(__name__)
 
 
-class Report(object):
-    def __init__(self, job, start_time, end_time):
+class JobExecutionResult(object):
+    def __init__(self, job, start_time, end_time, processed_item_count,
+                 failed):
         self.job = job
         self.start_time = start_time
         self.end_time = end_time
+        self.processed_item_count = processed_item_count
+        self.failed = failed
 
 
 class Job(object):
@@ -22,8 +25,6 @@ class Job(object):
         self._processors = processors
 
         self.id = uuid4().hex
-        self.processed_item_count = 0
-        self.failed = False
 
     def _notify_job_started(self):
         self._source.job_started(self)
@@ -52,39 +53,47 @@ class Job(object):
         for processor in self._processors:
             self._process_item(processor, item)
 
-        self.processed_item_count += 1
-
     def _retrieve_and_process_items(self):
+        processed_item_count = 0
+
         for item in self._source.items():
             self._process_item_with_processors(item)
+            processed_item_count += 1
+
+        return processed_item_count
 
     def run(self):
         logger.info("starting job with id %s", self.id)
 
-        self.failed = False
-        self.processed_item_count = 0
-
         start_time = datetime.utcnow()
         self._notify_job_started()
 
+        failed = False
+        processed_item_count = 0
         try:
-            self._retrieve_and_process_items()
+            processed_item_count = self._retrieve_and_process_items()
         except (KeyboardInterrupt, SystemExit):
             logger.warning("Job with %s stopped by user or system", self.id)
         except JobExecutionError:
             logger.error("Failed to execute job with id %s", self.id)
-            self.failed = True
+            failed = True
         except Exception:
             logger.exception("Error occurred in job with id %s", self.id)
 
-            self.failed = True
+            failed = True
         finally:
             self._notify_job_finished()
 
         logger.info("Finished executing job with id %s", self.id)
 
         end_time = datetime.utcnow()
-        return Report(self, start_time, end_time)
+        return JobExecutionResult(
+            job=self,
+            start_time=start_time,
+            end_time=end_time,
+            processed_item_count=processed_item_count,
+            failed=failed
+        )
 
 
 class HackernewsCrawlJob(Job):

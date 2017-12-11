@@ -4,7 +4,7 @@ from unittest import main
 from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.models import User, Report as Report
-from hnac import jobs
+from hnac.jobs import Job, JobExecutionResult
 
 from common import ModelTestCase, ModelTestCaseWithMockData
 
@@ -136,13 +136,17 @@ class UserAuthenticationTests(ModelTestCaseWithMockData):
 
 class JobResultTests(ModelTestCase):
     def test_save_job_result(self):
-        job = jobs.Job(None, None)
-        job.processed_item_count = 12
-        job.failed = True
+        job = Job(None, None)
 
         start_time = datetime(2016, 4, 5, 12, 0, 0)
         end_time = start_time + timedelta(seconds=50)
-        report = jobs.Report(job, start_time, end_time)
+        report = JobExecutionResult(
+            job=job,
+            start_time=start_time,
+            end_time=end_time,
+            failed=True,
+            processed_item_count=12
+        )
 
         report_object = Report.save_report(self.session, report)
 

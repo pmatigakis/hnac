@@ -22,7 +22,6 @@ class JobTests(TestCase):
         job = Job(source_instance, [processor_instance])
 
         job.run()
-        self.assertFalse(job.failed)
 
         source_instance.job_started.assert_called_once()
         processor_instance.job_started.assert_called_once()
@@ -55,7 +54,6 @@ class JobTests(TestCase):
         job = Job(source_instance, [processor_instance])
 
         job.run()
-        self.assertFalse(job.failed)
 
 
 if __name__ == "__main__":

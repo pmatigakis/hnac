@@ -12,8 +12,8 @@ class Crawl(Command):
     def run(self):
         job = create_hackernews_api_crawler_job(current_app.config, session)
 
-        report = job.run()
+        job_execution_result = job.run()
 
-        Report.save_report(session, report)
+        Report.save_report(session, job_execution_result)
 
         session.commit()

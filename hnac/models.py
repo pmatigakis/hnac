@@ -90,13 +90,13 @@ class Report(Base):
     num_processed_items = Column(Integer, nullable=False)
 
     @classmethod
-    def save_report(cls, session, report):
+    def save_report(cls, session, job_execution_result):
         report_object = cls(
-            job_id=report.job.id,
-            started_at=report.start_time,
-            completed_at=report.end_time,
-            failed=report.job.failed,
-            num_processed_items=report.job.processed_item_count
+            job_id=job_execution_result.job.id,
+            started_at=job_execution_result.start_time,
+            completed_at=job_execution_result.end_time,
+            failed=job_execution_result.failed,
+            num_processed_items=job_execution_result.processed_item_count
         )
 
         session.add(report_object)

@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.models import Base, User, Report
-from hnac import jobs
+from hnac.jobs import JobExecutionResult, Job
 from hnac.web.app import create_app
 from hnac.web import session
 
@@ -42,23 +42,31 @@ class ModelTestCaseWithMockData(ModelTestCase):
                            self.test_user_password)
         user.id = 1
 
-        job_1 = jobs.Job(None, None)
-        job_1.processed_item_count = 5
-        job_1.failed = True
+        job_1 = Job(None, None)
         job_1.id = "job_1_uuid"
         job_1_start_time = datetime(2016, 5, 6, 12, 0, 0)
         job_1_end_time = job_1_start_time + timedelta(seconds=40)
-        report_1 = jobs.Report(job_1, job_1_start_time, job_1_end_time)
+        report_1 = JobExecutionResult(
+            job=job_1,
+            start_time=job_1_start_time,
+            end_time=job_1_end_time,
+            failed=True,
+            processed_item_count=5
+        )
 
         Report.save_report(self.session, report_1)
 
-        job_2 = jobs.Job(None, None)
-        job_2.processed_item_count = 11
-        job_2.failed = False
+        job_2 = Job(None, None)
         job_2.id = "job_2_uuid"
         job_2_start_time = datetime(2016, 5, 6, 15, 0, 0)
         job_2_end_time = job_1_start_time + timedelta(seconds=40)
-        report_2 = jobs.Report(job_2, job_2_start_time, job_2_end_time)
+        report_2 = JobExecutionResult(
+            job=job_2,
+            start_time=job_2_start_time,
+            end_time=job_2_end_time,
+            failed=False,
+            processed_item_count=11
+        )
 
         Report.save_report(self.session, report_2)
 
