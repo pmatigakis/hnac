@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy import (Column, String, Integer, DateTime, Boolean, Sequence,
                         desc, ForeignKey)
+from sqlalchemy.orm import relationship
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.declarative import declarative_base
@@ -116,6 +117,21 @@ class HackernewsUser(Base):
     username = Column(String(40), nullable=False)
     created_at = Column(DateTime(timezone=False), nullable=False)
 
+    @classmethod
+    def create(cls, session, username):
+        user = cls(
+            username=username,
+            created_at=datetime.utcnow()
+        )
+
+        session.add(user)
+
+        return user
+
+    @classmethod
+    def get_by_username(cls, session, username):
+        return session.query(cls).filter_by(username=username).one_or_nonw()
+
 
 class Url(Base):
     __tablename__ = "urls"
@@ -123,6 +139,21 @@ class Url(Base):
     id = Column(Integer, nullable=False, primary_key=True)
     url = Column(String(2048), nullable=False)
     created_at = Column(DateTime(timezone=False))
+
+    @classmethod
+    def create(cls, session, url):
+        url_object = cls(
+            url=url,
+            created_at=datetime.utcnow()
+        )
+
+        session.add(url_object)
+
+        return url_object
+
+    @classmethod
+    def get_by_url(cls, session, url):
+        return session.query(cls).filter_by(url=url).one_or_none()
 
 
 class Story(Base):
@@ -154,3 +185,23 @@ class Story(Base):
     descendants = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=False), nullable=False)
     updated_at = Column(DateTime(timezone=False), nullable=False)
+
+    hackernews_user = relationship("HackernewsUser")
+    url = relationship("Url")
+
+    @classmethod
+    def create(cls, session, user, url, title, score, time, descendants):
+        story = cls(
+            hackernews_user=user,
+            url=url,
+            title=title,
+            score=score,
+            time=time,
+            descendants=descendants,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+
+        session.add(story)
+
+        return story
