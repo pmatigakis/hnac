@@ -136,7 +136,7 @@ class UserAuthenticationTests(ModelTestCaseWithMockData):
 
 class JobResultTests(ModelTestCase):
     def test_save_job_result(self):
-        job = jobs.Job(None, None, None)
+        job = jobs.Job(None, None)
         job.processed_item_count = 12
         job.failed = True
 

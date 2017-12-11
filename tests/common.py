@@ -42,7 +42,7 @@ class ModelTestCaseWithMockData(ModelTestCase):
                            self.test_user_password)
         user.id = 1
 
-        job_1 = jobs.Job(None, None, None)
+        job_1 = jobs.Job(None, None)
         job_1.processed_item_count = 5
         job_1.failed = True
         job_1.id = "job_1_uuid"
@@ -52,7 +52,7 @@ class ModelTestCaseWithMockData(ModelTestCase):
 
         Report.save_report(self.session, report_1)
 
-        job_2 = jobs.Job(None, None, None)
+        job_2 = jobs.Job(None, None)
         job_2.processed_item_count = 11
         job_2.failed = False
         job_2.id = "job_2_uuid"

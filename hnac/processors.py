@@ -154,7 +154,7 @@ class SQLAlchemyStorage(Processor):
             logger.info("processed story with id %s", story.story_id)
 
             return True
-        except SQLAlchemyStorage:
+        except SQLAlchemyError:
             self._session.rollback()
             logger.exception("failed to save story with story id %s", story_id)
 

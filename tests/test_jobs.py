@@ -19,9 +19,7 @@ class JobTests(TestCase):
         processor_instance.job_started = MagicMock()
         processor_instance.job_finished = MagicMock()
 
-        config = {}
-
-        job = Job(config, source_instance, [processor_instance])
+        job = Job(source_instance, [processor_instance])
 
         job.run()
         self.assertFalse(job.failed)
@@ -54,9 +52,7 @@ class JobTests(TestCase):
         processor_instance.process_item = MagicMock()
         processor_instance.process_item.side_effect = ValueError
 
-        config = {}
-
-        job = Job(config, source_instance, [processor_instance])
+        job = Job(source_instance, [processor_instance])
 
         job.run()
         self.assertFalse(job.failed)

@@ -3,6 +3,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from hnac.sources import HackernewsStories
+from hnac.exceptions import JobExecutionError
 
 
 logger = logging.getLogger(__name__)
@@ -16,8 +17,7 @@ class Report(object):
 
 
 class Job(object):
-    def __init__(self, config, source, processors):
-        self._config = config
+    def __init__(self, source, processors):
         self._source = source
         self._processors = processors
 
@@ -92,4 +92,4 @@ class HackernewsCrawlJob(Job):
         source = HackernewsStories()
         source.configure(config)
 
-        super(HackernewsCrawlJob, self).__init__(config, source, processors)
+        super(HackernewsCrawlJob, self).__init__(source, processors)
