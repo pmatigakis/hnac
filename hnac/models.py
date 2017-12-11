@@ -114,7 +114,7 @@ class HackernewsUser(Base):
     __tablename__ = "hackernews_users"
 
     id = Column(Integer, nullable=False, primary_key=True)
-    username = Column(String(40), nullable=False)
+    username = Column(String(40), nullable=False, unique=True)
     created_at = Column(DateTime(timezone=False), nullable=False)
 
     @classmethod
@@ -146,7 +146,7 @@ class Url(Base):
     __tablename__ = "urls"
 
     id = Column(Integer, nullable=False, primary_key=True)
-    url = Column(String(2048), nullable=False)
+    url = Column(String(2048), nullable=False, unique=True)
     created_at = Column(DateTime(timezone=False))
 
     @classmethod
