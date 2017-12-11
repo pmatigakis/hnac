@@ -6,7 +6,7 @@ from firebase import firebase
 from requests import RequestException
 
 from hnac.schemas import is_story_item
-from hnac.jobs import JobExecutionError
+from hnac.exceptions import JobExecutionError
 
 
 logger = logging.getLogger(__name__)

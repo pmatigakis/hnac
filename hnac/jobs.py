@@ -2,12 +2,10 @@ import logging
 from uuid import uuid4
 from datetime import datetime
 
+from hnac.sources import HackernewsStories
+
 
 logger = logging.getLogger(__name__)
-
-
-class JobExecutionError(Exception):
-    pass
 
 
 class Report(object):
@@ -87,3 +85,11 @@ class Job(object):
 
         end_time = datetime.utcnow()
         return Report(self, start_time, end_time)
+
+
+class HackernewsCrawlJob(Job):
+    def __init__(self, config, processors):
+        source = HackernewsStories()
+        source.configure(config)
+
+        super(HackernewsCrawlJob, self).__init__(config, source, processors)
