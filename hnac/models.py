@@ -232,3 +232,11 @@ class Story(Base):
     @classmethod
     def get_by_story_id(cls, session, story_id):
         return session.query(cls).filter_by(story_id=story_id).one_or_none()
+
+    @classmethod
+    def count(cls, session):
+        return session.query(cls).count()
+
+    @classmethod
+    def get_latest(cls, session, count=20):
+        return session.query(cls).order_by(desc(cls.time)).limit(count)

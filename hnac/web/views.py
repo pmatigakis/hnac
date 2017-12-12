@@ -1,12 +1,11 @@
 import logging
 
-from flask import Blueprint, render_template, redirect, url_for, current_app
+from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
-import couchdb
 
 from hnac.web import session
 from hnac.web.forms import LoginForm
-from hnac.models import User, Report
+from hnac.models import User, Report, Story
 
 
 logger = logging.getLogger(__name__)
@@ -18,25 +17,17 @@ blueprint = Blueprint("frontend", __name__)
 @blueprint.route("/")
 @login_required
 def index():
-    config = current_app.config
-
-    server = couchdb.Server(config["COUCHDB_SERVER"])
-    db = server[config["COUCHDB_DATABASE"]]
-
     latest_stories = []
 
-    result = db.view(
-        "stories/by_doc_id", limit=5, include_docs=True, descending=True)
-
-    for story in result.rows:
+    for story in Story.get_latest(session, 10):
         story = {
-            "by": story.doc["data"]["by"],
-            "id": story.doc["data"]["id"],
-            "time": story.doc["data"]["time"],
-            "title": story.doc["data"]["title"],
-            "url": story.doc["data"]["url"],
-            "score": story.doc["data"]["score"],
-            "descendants": story.doc["data"]["descendants"],
+            "by": story.hackernews_user.username,
+            "id": story.story_id,
+            "time": story.time,
+            "title": story.title,
+            "url": story.url.url,
+            "score": story.score,
+            "descendants": story.descendants
         }
 
         latest_stories.append(story)
@@ -44,7 +35,7 @@ def index():
     latest_reports = Report.get_latest(session)
 
     return render_template("index.html",
-                           story_count=result.total_rows,
+                           story_count=Story.count(session),
                            latest_stories=latest_stories,
                            latest_reports=latest_reports)
 
