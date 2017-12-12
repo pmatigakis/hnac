@@ -4,7 +4,6 @@ from os import path
 from flask_script import Manager
 
 from hnac.web.app import create_app
-from hnac.cli.commands.database import CreateDatabase
 from hnac.cli.commands.users import (CreateAPIUser, ListAPIUsers,
                                      DeleteAPIUser, ChangeAPIUserPassword)
 from hnac.cli.commands.crawler import Crawl
@@ -25,8 +24,6 @@ def main():
     app = create_app(environment, configuration_file_path)
 
     manager = Manager(app)
-
-    manager.add_command("initdb", CreateDatabase())
 
     user_manager = Manager(usage="API user management")
     user_manager.add_command("create", CreateAPIUser())
