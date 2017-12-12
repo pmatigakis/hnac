@@ -1,5 +1,3 @@
-import logging
-from logging.handlers import RotatingFileHandler
 from sqlalchemy import create_engine
 from flask import Flask
 from flask_admin import Admin
@@ -12,6 +10,7 @@ from hnac.web.authentication import (login_manager, authenticate, identity,
 from hnac.models import User, Report
 from hnac.web.admin import (ReportModelView, UserModelView,
                             AuthenticatedIndexView)
+from hnac.logging import configure_logging
 
 
 def create_app(environment="production", settings_module=None):
@@ -29,36 +28,7 @@ def create_app(environment="production", settings_module=None):
     if settings_module:
         app.config.from_pyfile(settings_module)
 
-    if app.config["ENABLE_LOGGING"]:
-        logger = logging.getLogger("hnac")
-        logger.handlers = []
-
-        log_level = app.config["LOG_LEVEL"]
-        log_format = app.config["LOG_FORMAT"]
-
-        formatter = logging.Formatter(log_format)
-
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        console_handler.setLevel(log_level)
-
-        logger.addHandler(console_handler)
-
-        log_file = app.config["LOG_FILE"]
-
-        file_handler = RotatingFileHandler(
-            log_file,
-            mode="a",
-            maxBytes=app.config["LOG_FILE_SIZE"],
-            backupCount=app.config["LOG_FILE_COUNT"]
-        )
-
-        file_handler.setFormatter(formatter)
-        file_handler.setLevel(log_level)
-
-        logger.addHandler(file_handler)
-
-        logger.setLevel(log_level)
+    configure_logging(app.config)
 
     db = app.config["DB"]
 

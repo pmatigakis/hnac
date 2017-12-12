@@ -1,6 +1,3 @@
-import logging
-
-
 SECRET_KEY = "secret"
 TESTING = False
 DEBUG = False
@@ -12,13 +9,6 @@ CRAWLER_STORY_UPDATE_DELTA = 3600
 
 API_HOST = "127.0.0.1"
 API_PORT = 5000
-
-ENABLE_LOGGING = False
-LOG_FILE = "hnac_api.log"
-LOG_LEVEL = logging.INFO
-LOG_FILE_SIZE = 2 ** 24
-LOG_FILE_COUNT = 5
-LOG_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
 
 ENVIRONMENT = "production"
 
