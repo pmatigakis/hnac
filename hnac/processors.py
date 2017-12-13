@@ -35,8 +35,6 @@ class CouchDBStorage(Processor):
     def __init__(self):
         super(CouchDBStorage, self).__init__()
 
-        self.update_delta = 3600
-
         self._db = None
 
     def _init_database(self, host, database_name):
@@ -52,8 +50,6 @@ class CouchDBStorage(Processor):
 
         self._init_database(connection_string, database_name)
 
-        self.update_delta = config["CRAWLER_STORY_UPDATE_DELTA"]
-
     def process_item(self, source, item):
         if not is_story_item(item):
             logger.warning("item is not a story object")
@@ -64,16 +60,14 @@ class CouchDBStorage(Processor):
 
         doc = self._db.get(doc_id)
 
-        if doc:
-            logger.debug("CouchDb document with id %s already exists", doc_id)
+        current_time = time()
+        if doc is None:
+            # the document doesn't exist so we have to create it
+            doc = {
+                "created_at": current_time
+            }
 
-            if doc["updated_at"] + self.update_delta > time():
-                logger.debug("Story with id %d doesn't need update", story_id)
-                return True
-        else:
-            doc = {}
-
-        doc["updated_at"] = time()
+        doc["updated_at"] = current_time
         doc["data"] = item
 
         logger.info("saving story with id %s to couchdb", story_id)

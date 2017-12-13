@@ -48,16 +48,13 @@ class CouchDBStorageTests(TestCase):
 
         config = {
             "COUCHDB_SERVER": HOST,
-            "COUCHDB_DATABASE": DATABASE_NAME,
-            "CRAWLER_STORY_UPDATE_DELTA": UPDATE_DELTA
+            "COUCHDB_DATABASE": DATABASE_NAME
         }
 
         processor = CouchDBStorage()
         processor._init_database = MagicMock()
 
         processor.configure(config)
-
-        self.assertEqual(processor.update_delta, UPDATE_DELTA)
 
         processor._init_database.assert_called_once_with(HOST, DATABASE_NAME)
 
