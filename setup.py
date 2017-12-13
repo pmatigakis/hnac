@@ -24,7 +24,8 @@ setup(
         "alembic==0.8.8",
         "psycopg2==2.6.2",
         "Flask-Admin==1.4.2",
-        "uWSGI==2.0.14"
+        "uWSGI==2.0.14",
+        "pika==0.10.0"
     ],
     
     tests_require=[
