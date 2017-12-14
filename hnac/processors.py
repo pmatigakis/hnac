@@ -16,23 +16,46 @@ logger = logging.getLogger(__name__)
 
 
 class Processor(object):
+    """Base processor object"""
+
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def process_item(self, source, item):
+        """Process the given item
+
+        :param Source source: the source that generated the object
+        :param dict item: the hackernews item
+        :rtype: boolean
+        :return: True if the item has been processed without errors
+        """
         pass
 
     def configure(self, config):
+        """Configure the Processor implementation
+
+        :param dict config: the processor configuration
+        """
         pass
 
     def job_started(self, job):
+        """Signal the Processor implementation that the job has started
+
+        :param Job job: the job
+        """
         pass
 
     def job_finished(self, job):
+        """Signal the Processor implementation that the job has finished
+
+        :param Job job: the job
+        """
         pass
 
 
 class CouchDBStorage(Processor):
+    """Save the hackernews stories to a CouchDb database"""
+
     def __init__(self):
         super(CouchDBStorage, self).__init__()
 
@@ -91,7 +114,13 @@ class DummyProcessor(Processor):
 
 
 class SQLAlchemyStorage(Processor):
+    """Save the hackernews stories to a database using sqlalchemy"""
+
     def __init__(self, session):
+        """Create a new SQLAlchemyStorage object
+
+        :param Session session: the sqlalchemy Session object to use
+        """
         self._session = session
 
     def _create_story(self, story_data):
@@ -157,6 +186,8 @@ class SQLAlchemyStorage(Processor):
 
 
 class RabbitMQProcessor(object):
+    """Publish hackernews stories to an RabbitMQ server"""
+
     def __init__(self):
         self._publisher = None
 

@@ -33,6 +33,7 @@ class Crawl(Command):
         logger.info("executed hackernews crawl job %s", job.id)
 
     def run(self):
+        """Start the crawler"""
         try:
             self._run_hackernews_crawl_job()
         except Exception:

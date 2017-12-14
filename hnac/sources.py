@@ -17,23 +17,44 @@ class RetryCountExceeded(Exception):
 
 
 class Source(object):
+    """Base class for all hackernews item source objects"""
+
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def items(self):
+        """Retrieve the hackernews items
+
+        :rtype: Iterable
+        :return: a generator that return the hackernews items
+        """
         pass
 
     def configure(self, config):
+        """Configure the Source object
+
+        :param dict config: the object configuration
+        """
         pass
 
     def job_started(self, job):
+        """Signal the source implementation that the job has started
+
+        :param Job job: the job
+        """
         pass
 
     def job_finished(self, job):
+        """Signal the Source implementation that the job has finished
+
+        :param Job job: the job
+        """
         pass
 
 
 class HackernewsStories(Source):
+    """Hackernews source"""
+
     def __init__(self):
         super(HackernewsStories, self).__init__()
 

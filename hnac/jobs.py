@@ -20,7 +20,14 @@ class JobExecutionResult(object):
 
 
 class Job(object):
+    """Crawl job base class"""
+
     def __init__(self, source, processors):
+        """Create a new Job object
+
+        :param Source source: the hackernews source object to use
+        :param list[Processor] processors: the hackernews item processors
+        """
         self._source = source
         self._processors = processors
 
@@ -63,6 +70,7 @@ class Job(object):
         return processed_item_count
 
     def run(self):
+        """Start the job"""
         logger.info("starting job with id %s", self.id)
 
         start_time = datetime.utcnow()
@@ -97,7 +105,14 @@ class Job(object):
 
 
 class HackernewsCrawlJob(Job):
+    """Hackaernews crawl job"""
+
     def __init__(self, config, processors):
+        """Create a new HackernewsCrawlJob object
+
+        :param dict config: the job configuration
+        :param list[Processor] processors: the hackernews item processors
+        """
         source = HackernewsStories()
         source.configure(config)
 
