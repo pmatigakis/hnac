@@ -36,6 +36,9 @@ class Crawl(Command):
         """Start the crawler"""
         try:
             self._run_hackernews_crawl_job()
+        except (KeyboardInterrupt, SystemExit):
+            session.rollback()
+            logger.info("crawler stopped by user or system")
         except Exception:
             session.rollback()
             logger.exception("failed to execute hackernews crawl job")

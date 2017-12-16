@@ -80,14 +80,8 @@ class Job(object):
         processed_item_count = 0
         try:
             processed_item_count = self._retrieve_and_process_items()
-        except (KeyboardInterrupt, SystemExit):
-            logger.warning("Job with %s stopped by user or system", self.id)
         except JobExecutionError:
             logger.error("Failed to execute job with id %s", self.id)
-            failed = True
-        except Exception:
-            logger.exception("Error occurred in job with id %s", self.id)
-
             failed = True
         finally:
             self._notify_job_finished()
