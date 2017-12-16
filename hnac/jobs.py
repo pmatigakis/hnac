@@ -3,7 +3,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from hnac.sources import HackernewsStories
-from hnac.exceptions import JobExecutionError
+from hnac.exceptions import JobExecutionError, ItemProcessingError
 
 
 logger = logging.getLogger(__name__)
@@ -47,14 +47,11 @@ class Job(object):
 
     def _process_item(self, processor, item):
         try:
-            result = processor.process_item(self._source, item)
+            processor.process_item(self._source, item)
+        except ItemProcessingError:
+            logger.info("processor %s failed to process item", type(processor))
         except Exception:
             logger.exception("processor failed to process item")
-            return
-
-        if not result:
-            logger.error("Processor didn't process successfully "
-                         "this item")
 
     def _process_item_with_processors(self, item):
         for processor in self._processors:
@@ -63,9 +60,14 @@ class Job(object):
     def _retrieve_and_process_items(self):
         processed_item_count = 0
 
-        for item in self._source.items():
-            self._process_item_with_processors(item)
-            processed_item_count += 1
+        try:
+            for item in self._source.items():
+                self._process_item_with_processors(item)
+                processed_item_count += 1
+        except Exception:
+            logger.exception(
+                "failed to retrieve and process items for job %s", self.id)
+            raise JobExecutionError("failed to retrieve and process items")
 
         return processed_item_count
 
@@ -81,7 +83,7 @@ class Job(object):
         try:
             processed_item_count = self._retrieve_and_process_items()
         except JobExecutionError:
-            logger.error("Failed to execute job with id %s", self.id)
+            logger.info("Failed to execute job with id %s", self.id)
             failed = True
         finally:
             self._notify_job_finished()

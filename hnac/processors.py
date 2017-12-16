@@ -10,6 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from hnac.schemas import is_story_item
 from hnac.models import HackernewsUser, Url, Story
 from hnac.queues import create_publisher_from_config
+from hnac.exceptions import ItemProcessingError
 
 
 logger = logging.getLogger(__name__)
@@ -74,15 +75,33 @@ class CouchDBStorage(Processor):
 
         self._init_database(connection_string, database_name)
 
+    def _get_document(self, doc_id):
+        try:
+            return self._db.get(doc_id)
+        except HTTPError:
+            msg = "failed to retrieve story document with id %s from couchdb"
+            logger.exception(msg, doc_id)
+
+            raise ItemProcessingError("failed to retrieve story document")
+
+    def _save_document(self, story_id, doc_id, doc):
+        try:
+            self._db[doc_id] = doc
+        except HTTPError:
+            msg = "Failed to save story with id to CouchDB %d"
+            logger.exception(msg, story_id)
+
+            raise ItemProcessingError("failed to save story document")
+
     def process_item(self, source, item):
         if not is_story_item(item):
             logger.warning("item is not a story object")
-            return True
+            return
 
         story_id = item["id"]
         doc_id = "hackernews/item/%d" % story_id
 
-        doc = self._db.get(doc_id)
+        doc = self._get_document(doc_id)
 
         current_time = time()
         if doc is None:
@@ -96,21 +115,12 @@ class CouchDBStorage(Processor):
 
         logger.info("saving story with id %s to couchdb", story_id)
 
-        try:
-            self._db[doc_id] = doc
-        except HTTPError:
-            logger.exception("Failed to save story with id to CouchDB %d",
-                             story_id)
-            return False
-
-        return True
+        self._save_document(story_id, doc_id, doc)
 
 
 class DummyProcessor(Processor):
     def process_item(self, source, item):
         print(item)
-
-        return True
 
 
 class SQLAlchemyStorage(Processor):
@@ -160,7 +170,7 @@ class SQLAlchemyStorage(Processor):
     def process_item(self, source, item):
         if not is_story_item(item):
             logger.info("item is not a story object")
-            return True
+            return
 
         story_id = item["id"]
         logger.info("processing story with id %s", story_id)
@@ -176,13 +186,11 @@ class SQLAlchemyStorage(Processor):
         try:
             self._session.commit()
             logger.info("processed story with id %s", story.story_id)
-
-            return True
         except SQLAlchemyError:
             self._session.rollback()
             logger.exception("failed to save story with story id %s", story_id)
 
-            return False
+            raise ItemProcessingError("failed to save story to database")
 
 
 class RabbitMQProcessor(object):
@@ -221,10 +229,8 @@ class RabbitMQProcessor(object):
     def process_item(self, source, item):
         if not is_story_item(item):
             logger.info("item is not a story object")
-            return True
+            return
 
         logger.info("publishing story with id %s", item["id"])
 
         self._publisher.publish_story(item)
-
-        return True
