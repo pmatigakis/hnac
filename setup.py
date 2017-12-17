@@ -22,7 +22,7 @@ setup(
         "Flask-RESTful==0.3.5",
         "Flask-JWT==0.3.2",
         "alembic==0.8.8",
-        "psycopg2==2.6.2",
+        "psycopg2==2.7.3.2",
         "Flask-Admin==1.4.2",
         "uWSGI==2.0.14",
         "pika==0.10.0"
