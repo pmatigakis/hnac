@@ -2,6 +2,9 @@ dist: trusty
 language: python
 python:
   - "3.4"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libpq-dev python-dev
 install:
   - python setup.py install
 after_success:
