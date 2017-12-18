@@ -9,3 +9,5 @@ temp/
 .idea
 .eggs
 virtualenv/
+.coverage
+cover/

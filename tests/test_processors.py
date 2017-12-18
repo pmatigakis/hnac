@@ -42,7 +42,6 @@ class UpdateStoryMatcher(object):
 
 class CouchDBStorageTests(TestCase):
     def test_configure(self):
-        UPDATE_DELTA = 123
         HOST = "localhost:9999"
         DATABASE_NAME = "test_database"
 

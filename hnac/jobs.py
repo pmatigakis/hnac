@@ -64,10 +64,11 @@ class Job(object):
             for item in self._source.items():
                 self._process_item_with_processors(item)
                 processed_item_count += 1
-        except Exception:
+        except Exception as e:
             logger.exception(
                 "failed to retrieve and process items for job %s", self.id)
-            raise JobExecutionError("failed to retrieve and process items")
+            raise JobExecutionError(
+                "failed to retrieve and process items") from e
 
         return processed_item_count
 
