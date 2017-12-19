@@ -2,11 +2,11 @@ from abc import ABCMeta, abstractmethod
 import logging
 from time import time, sleep
 
-from firebase import firebase
 from requests import RequestException
 
 from hnac.schemas import is_story_item
 from hnac.exceptions import JobExecutionError
+from hnac.firebase import create_hackernews_firebase_app
 
 
 logger = logging.getLogger(__name__)
@@ -63,11 +63,7 @@ class HackernewsStories(Source):
         self.abort_after = 3
 
         self._last_request_time = 0.0
-
-        api_endpoint = "https://hacker-news.firebaseio.com"
-
-        self._firebase = firebase.FirebaseApplication(api_endpoint, None)
-
+        self._firebase = create_hackernews_firebase_app()
         self._story_ids = None
 
     def configure(self, config):
