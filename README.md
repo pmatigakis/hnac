@@ -19,13 +19,10 @@ Usage
 =====
 
 Create the configuration file *settings.py* and set the variables for the Postgresql
-database and the Couchdb database
+database.
 
 ```python
 DB = "postgresql+psycopg2://username:password@localhost:5432/hnac"
-
-COUCHDB_SERVER = "http://localhost:5984"
-COUCHDB_DATABASE = "hnac"
 ```
 
 Edit the alembic.ini file and set the *sqlalchemy.url* variable to point to your
@@ -53,6 +50,10 @@ job that will execute this command in a time interval of your choosing
 ```
 hnac crawl
 ```
+
+You can enable additional handlers in order to save the hackernews stories on
+a CouchDB database or publish them on RabbitMQ. See the example `settings.py` file
+in the `templates` folder for an example on how to use them.
 
 Api
 ===
