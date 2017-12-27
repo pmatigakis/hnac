@@ -9,7 +9,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.schemas import is_story_item
 from hnac.models import HackernewsUser, Url, Story
-from hnac.queues import create_story_publisher_from_config
+from hnac.queues import (
+    create_story_publisher_from_config, create_url_publisher_from_config
+)
 from hnac.exceptions import ItemProcessingError
 
 
@@ -233,12 +235,14 @@ class RabbitMQProcessorBase(Processor):
         """Create the publisher object that this processor will use
 
         :param dict config: the configuration settings
+        :rtype: RabbitMQPublisher
+        :return: the publisher that this processor will use
         """
         pass
 
 
 class RabbitMQStoryProcessor(RabbitMQProcessorBase):
-    """Publish hackernews stories to an RabbitMQ server"""
+    """Processor that published the hackernews stories to a RabbitMQ server"""
 
     def _create_publisher(self, config):
         return create_story_publisher_from_config(config)
@@ -251,3 +255,23 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
         logger.info("publishing story with id %s", item["id"])
 
         self._publisher.publish_story(item)
+
+
+class RabbitMQURLProcessor(RabbitMQProcessorBase):
+    """Processor that published the urls of hackernews stories to a RabbitMQ
+    server"""
+
+    def _create_publisher(self, config):
+        return create_url_publisher_from_config(config)
+
+    def process_item(self, source, item):
+        if not is_story_item(item):
+            logger.info("item is not a story object")
+            return
+
+        url = item.get("url")
+        if url is None:
+            logger.info("story with id %s doesn't contain a url", item["id"])
+            return
+
+        self._publisher.publish_item(url)

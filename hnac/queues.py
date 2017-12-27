@@ -20,6 +20,22 @@ def create_story_publisher_from_config(config):
     )
 
 
+def create_url_publisher_from_config(config):
+    username = config.get("RABBITMQ_URL_PROCESSOR_USERNAME")
+    password = config.get("RABBITMQ_URL_PROCESSER_PASSWORD")
+    credentials = None
+    if username and password:
+        credentials = PlainCredentials(username, password)
+
+    return RabbitMQPublisher(
+        host=config["RABBITMQ_URL_PROCESSOR_HOST"],
+        port=config.get("RABBITMQ_URL_PROCESSOR_PORT"),
+        credentials=credentials,
+        exchange=config.get("RABBITMQ_URL_PROCESSOR_EXCHANGE", ""),
+        routing_key=config["RABBITMQ_URL_PROCESSOR_ROUTING_KEY"]
+    )
+
+
 class RabbitMQPublisher(object):
     def __init__(self, host, port, credentials, exchange, routing_key):
         self._exchange = exchange
