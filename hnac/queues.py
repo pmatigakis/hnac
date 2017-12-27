@@ -4,19 +4,19 @@ import pika
 from pika.credentials import PlainCredentials
 
 
-def create_publisher_from_config(config):
-    username = config.get("URLPUB_RABBITMQ_USERNAME")
-    password = config.get("URLPUB_RABBITMQ_PASSWORD")
+def create_story_publisher_from_config(config):
+    username = config.get("RABBITMQ_STORY_PROCESSOR_USERNAME")
+    password = config.get("RABBITMQ_STORY_PROCESSER_PASSWORD")
     credentials = None
     if username and password:
         credentials = PlainCredentials(username, password)
 
-    return RabbitMQPublisher(
-        host=config["URLPUB_RABBITMQ_HOST"],
-        port=config.get("URLPUB_RABBITMQ_PORT"),
+    return RabbitMQStoryPublisher(
+        host=config["RABBITMQ_STORY_PROCESSOR_HOST"],
+        port=config.get("RABBITMQ_STORY_PROCESSOR_PORT"),
         credentials=credentials,
-        exchange=config.get("URLPUB_RABBITMQ_EXCHANGE", ""),
-        routing_key=config["URLPUB_RABBITMQ_ROUTING_KEY"]
+        exchange=config.get("RABBITMQ_STORY_PROCESSOR_EXCHANGE", ""),
+        routing_key=config["RABBITMQ_STORY_PROCESSOR_ROUTING_KEY"]
     )
 
 
@@ -41,11 +41,41 @@ class RabbitMQPublisher(object):
     def close(self):
         self._connection.close()
 
-    def publish_story(self, story_data):
-        encoded_story_data = json.dumps(story_data)
-
+    def publish_item(self, item):
         self._channel.basic_publish(
             exchange=self._exchange,
             routing_key=self._routing_key,
-            body=encoded_story_data
+            body=item
         )
+
+
+class RabbitMQStoryPublisher(RabbitMQPublisher):
+    """The RabbitMQStoryPublisher object is used to publish hacked news
+    stories to RabbitMQ"""
+
+    def __init__(self, host, port, credentials, exchange, routing_key):
+        """Create a new RabbitMQStoryPublisher object
+
+        :param str host: the RabbitMQ host
+        :param int port: the port on which RabbitMQ listens
+        :param PlainCredentials credentials: the credentials to use in order to
+        connect to RabbitMQ
+        :param str exchange: the exchange to publish the stories
+        :param str routing_key: the routing key to use
+        """
+        super(RabbitMQStoryPublisher, self).__init__(
+            host=host,
+            port=port,
+            credentials=credentials,
+            exchange=exchange,
+            routing_key=routing_key
+        )
+
+    def publish_story(self, story_data):
+        """Publish a story to RabbitMQ
+
+        :param dict story_data: the story data
+        """
+        encoded_story_data = json.dumps(story_data)
+
+        self.publish_item(encoded_story_data)

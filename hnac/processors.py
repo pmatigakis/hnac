@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.schemas import is_story_item
 from hnac.models import HackernewsUser, Url, Story
-from hnac.queues import create_publisher_from_config
+from hnac.queues import create_story_publisher_from_config
 from hnac.exceptions import ItemProcessingError
 
 
@@ -193,14 +193,14 @@ class SQLAlchemyStorage(Processor):
             raise ItemProcessingError("failed to save story to database")
 
 
-class RabbitMQProcessor(object):
+class RabbitMQStoryProcessor(object):
     """Publish hackernews stories to an RabbitMQ server"""
 
     def __init__(self):
         self._publisher = None
 
     def configure(self, config):
-        logger.info("Configuring RabbitMQProcessor")
+        logger.info("Configuring RabbitMQStoryProcessor")
 
         if self._publisher is not None:
             try:
@@ -208,7 +208,7 @@ class RabbitMQProcessor(object):
             except Exception:
                 logger.exception("failed to disconnect from RabbitMQ")
 
-        self._publisher = create_publisher_from_config(config)
+        self._publisher = create_story_publisher_from_config(config)
 
     def job_started(self, job):
         logger.info("connecting to RabbitMQ")
