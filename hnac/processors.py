@@ -193,8 +193,10 @@ class SQLAlchemyStorage(Processor):
             raise ItemProcessingError("failed to save story to database")
 
 
-class RabbitMQStoryProcessor(object):
-    """Publish hackernews stories to an RabbitMQ server"""
+class RabbitMQProcessorBase(Processor):
+    """Base class for processor that use RabbitMQ"""
+
+    __metaclass__ = ABCMeta
 
     def __init__(self):
         self._publisher = None
@@ -208,7 +210,7 @@ class RabbitMQStoryProcessor(object):
             except Exception:
                 logger.exception("failed to disconnect from RabbitMQ")
 
-        self._publisher = create_story_publisher_from_config(config)
+        self._publisher = self._create_publisher(config)
 
     def job_started(self, job):
         logger.info("connecting to RabbitMQ")
@@ -225,6 +227,21 @@ class RabbitMQStoryProcessor(object):
             self._publisher.close()
         except Exception:
             logger.exception("failed to disconnect from RabbitMQ")
+
+    @abstractmethod
+    def _create_publisher(self, config):
+        """Create the publisher object that this processor will use
+
+        :param dict config: the configuration settings
+        """
+        pass
+
+
+class RabbitMQStoryProcessor(RabbitMQProcessorBase):
+    """Publish hackernews stories to an RabbitMQ server"""
+
+    def _create_publisher(self, config):
+        return create_story_publisher_from_config(config)
 
     def process_item(self, source, item):
         if not is_story_item(item):
