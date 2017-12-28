@@ -1,5 +1,7 @@
 from unittest import TestCase, main
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
+
+from requests import RequestException
 
 from hnac.sources import HackernewsStories, RetryCountExceeded
 from hnac.exceptions import JobExecutionError
@@ -56,6 +58,78 @@ class HackernewsStoriesItemRetrieval(TestCase):
 
         items = [item for item in source.items()]
         self.assertEquals(items, [])
+
+    def test_configure(self):
+        source = HackernewsStories()
+
+        configuration = {
+            "CRAWLER_WAIT_TIME": 111,
+            "CRAWLER_BACKOFF_TIME": 222,
+            "CRAWLER_ABORT_AFTER": 333
+        }
+        source.configure(configuration)
+
+        self.assertEqual(source.wait_time, 111)
+        self.assertEqual(source.backoff_time, 222)
+        self.assertEqual(source.abort_after, 333)
+
+    @patch("hnac.sources.sleep")
+    @patch("hnac.sources.create_hackernews_firebase_app")
+    def test_abort_after_failing_to_retrieve_new_stories(
+            self, create_hackernews_firebase_app_mock, sleep_mock):
+
+        def firebase_get(url, *args):
+            if url == "/v0/newstories":
+                raise RequestException("something went wrong")
+            elif url == "/v0/item":
+                return story_1_data
+
+        instance = MagicMock()
+        create_hackernews_firebase_app_mock.return_value = instance
+        instance.get.side_effect = firebase_get
+        sleep_mock.return_value = None
+
+        source = HackernewsStories()
+
+        with self.assertRaises(JobExecutionError):
+            [item for item in source.items()]
+
+        instance.get.assert_has_calls(
+            [
+                call("/v0/newstories", None),
+                call("/v0/newstories", None),
+                call("/v0/newstories", None)
+            ]
+        )
+
+    @patch("hnac.sources.sleep")
+    @patch("hnac.sources.create_hackernews_firebase_app")
+    def test_abort_after_failing_to_retrieve_story(
+            self, create_hackernews_firebase_app_mock, sleep_mock):
+
+        def firebase_get(url, *args):
+            if url == "/v0/newstories":
+                return [123, 456]
+            elif url == "/v0/item":
+                raise RequestException("something went wrong")
+
+        instance = MagicMock()
+        create_hackernews_firebase_app_mock.return_value = instance
+        instance.get.side_effect = firebase_get
+        sleep_mock.return_value = None
+
+        source = HackernewsStories()
+
+        with self.assertRaises(JobExecutionError):
+            [item for item in source.items()]
+
+        instance.get.assert_has_calls(
+            [
+                call("/v0/item", 123),
+                call("/v0/item", 123),
+                call("/v0/item", 123)
+            ]
+        )
 
 
 if __name__ == "__main__":
