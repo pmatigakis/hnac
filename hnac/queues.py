@@ -54,6 +54,11 @@ class RabbitMQPublisher(object):
         self._connection = pika.BlockingConnection(self._connection_parameters)
         self._channel = self._connection.channel()
 
+        self._channel.exchange_declare(
+            exchange=self._exchange,
+            exchange_type="topic"
+        )
+
     def close(self):
         self._connection.close()
 
