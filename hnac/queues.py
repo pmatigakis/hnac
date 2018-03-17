@@ -27,7 +27,7 @@ def create_url_publisher_from_config(config):
     if username and password:
         credentials = PlainCredentials(username, password)
 
-    return RabbitMQPublisher(
+    return RabbitMQUrlPublisher(
         host=config["RABBITMQ_URL_PROCESSOR_HOST"],
         port=config.get("RABBITMQ_URL_PROCESSOR_PORT"),
         credentials=credentials,
@@ -38,6 +38,15 @@ def create_url_publisher_from_config(config):
 
 class RabbitMQPublisher(object):
     def __init__(self, host, port, credentials, exchange, routing_key):
+        """Create a new RabbitMQPublisher object
+
+        :param str host: the RabbitMQ host
+        :param int port: the port on which RabbitMQ listens
+        :param PlainCredentials credentials: the credentials to use in order to
+        connect to RabbitMQ
+        :param str exchange: the exchange to publish the stories
+        :param str routing_key: the routing key to use
+        """
         self._exchange = exchange
         self._routing_key = routing_key
 
@@ -74,24 +83,6 @@ class RabbitMQStoryPublisher(RabbitMQPublisher):
     """The RabbitMQStoryPublisher object is used to publish hacked news
     stories to RabbitMQ"""
 
-    def __init__(self, host, port, credentials, exchange, routing_key):
-        """Create a new RabbitMQStoryPublisher object
-
-        :param str host: the RabbitMQ host
-        :param int port: the port on which RabbitMQ listens
-        :param PlainCredentials credentials: the credentials to use in order to
-        connect to RabbitMQ
-        :param str exchange: the exchange to publish the stories
-        :param str routing_key: the routing key to use
-        """
-        super(RabbitMQStoryPublisher, self).__init__(
-            host=host,
-            port=port,
-            credentials=credentials,
-            exchange=exchange,
-            routing_key=routing_key
-        )
-
     def publish_story(self, story_data):
         """Publish a story to RabbitMQ
 
@@ -100,3 +91,17 @@ class RabbitMQStoryPublisher(RabbitMQPublisher):
         encoded_story_data = json.dumps(story_data)
 
         self.publish_item(encoded_story_data)
+
+
+class RabbitMQUrlPublisher(RabbitMQPublisher):
+    """The RabbitMQUrlPublisher object is used to publish the urls of
+    hackednews stories to RabbitMQ"""
+
+    def publish_url(self, url):
+        """Publish a story to RabbitMQ
+
+        :param dict story_data: the story data
+        """
+        encoded_url_data = json.dumps({"url": url})
+
+        self.publish_item(encoded_url_data)

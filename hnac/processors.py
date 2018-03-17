@@ -274,4 +274,4 @@ class RabbitMQURLProcessor(RabbitMQProcessorBase):
             logger.info("story with id %s doesn't contain a url", item["id"])
             return
 
-        self._publisher.publish_item(url)
+        self._publisher.publish_url(url)
