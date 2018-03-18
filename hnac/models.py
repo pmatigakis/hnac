@@ -1,5 +1,6 @@
 from datetime import datetime
 from uuid import uuid4
+from collections import namedtuple
 
 from sqlalchemy import (Column, String, Integer, DateTime, Boolean, Sequence,
                         desc, ForeignKey)
@@ -240,3 +241,9 @@ class Story(Base):
     @classmethod
     def get_latest(cls, session, count=20):
         return session.query(cls).order_by(desc(cls.time)).limit(count)
+
+
+HackernewsStoryItem = namedtuple(
+    "HackernewsStoryItem",
+    ["id", "type", "by", "descendants", "score", "time", "title", "url"]
+)

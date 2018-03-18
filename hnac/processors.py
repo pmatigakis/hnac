@@ -8,7 +8,7 @@ from couchdb.http import HTTPError
 from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.schemas import is_story_item
-from hnac.models import HackernewsUser, Url, Story
+from hnac.models import HackernewsUser, Url, Story, HackernewsStoryItem
 from hnac.queues import (
     create_story_publisher_from_config, create_url_publisher_from_config
 )
@@ -136,28 +136,27 @@ class SQLAlchemyStorage(Processor):
         self._session = session
 
     def _create_story(self, story_data):
-        story_id = story_data["id"]
+        story_id = story_data.id
 
         logger.info("creating story object with story id %s", story_id)
 
-        username = story_data["by"]
+        username = story_data.by
         user = HackernewsUser.get_or_create_by_username(
             session=self._session,
             username=username
         )
 
-        url = story_data["url"]
-        url_object = Url.get_or_create_by_url(self._session, url)
+        url_object = Url.get_or_create_by_url(self._session, story_data.url)
 
         story = Story.create(
             session=self._session,
             url=url_object,
             user=user,
             story_id=story_id,
-            title=story_data["title"],
-            score=story_data["score"],
-            time=story_data["time"],
-            descendants=story_data["descendants"]
+            title=story_data.title,
+            score=story_data.score,
+            time=story_data.time,
+            descendants=story_data.descendants
         )
 
         return story
@@ -165,16 +164,16 @@ class SQLAlchemyStorage(Processor):
     def _update_story(self, story, story_data):
         logger.info("updating story object with story id %s", story.story_id)
 
-        story.score = story_data["score"]
-        story.descendants = story_data["descendants"]
+        story.score = story_data.score
+        story.descendants = story_data.descendants
         story.updated_at = datetime.utcnow()
 
     def process_item(self, source, item):
-        if not is_story_item(item):
+        if not isinstance(item, HackernewsStoryItem):
             logger.info("item is not a story object")
             return
 
-        story_id = item["id"]
+        story_id = item.id
         logger.info("processing story with id %s", story_id)
         story = Story.get_by_story_id(self._session, story_id)
 

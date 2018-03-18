@@ -4,7 +4,7 @@ from time import time, sleep
 
 from requests import RequestException
 
-from hnac.schemas import is_story_item
+from hnac.schemas import is_story_item, HackernewsStorySchema
 from hnac.exceptions import JobExecutionError
 from hnac.firebase import create_hackernews_firebase_app
 
@@ -144,4 +144,14 @@ class HackernewsStories(Source):
                                story_id)
                 continue
 
-            yield story_data
+            schema = HackernewsStorySchema()
+            serialization_result = schema.load(story_data)
+
+            if serialization_result.errors:
+                logger.warning(
+                    "failed to deserialize story item: error(%s)",
+                    serialization_result.errors
+                )
+                continue
+
+            yield serialization_result.data
