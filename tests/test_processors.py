@@ -2,6 +2,7 @@ from unittest import TestCase, main
 from unittest.mock import MagicMock
 
 from hnac.processors import CouchDBStorage
+from hnac.models import HackernewsStoryItem
 
 from mock_data import story_1_data
 
@@ -67,7 +68,7 @@ class CouchDBStorageTests(TestCase):
 
         processor._db = mocked_db_instance
 
-        processor.process_item(None, story_1_data)
+        processor.process_item(None, HackernewsStoryItem(**story_1_data))
 
         processor._db.get.assert_called_once_with('hackernews/item/11976079')
 
@@ -93,7 +94,7 @@ class CouchDBStorageTests(TestCase):
 
         processor._db = mocked_db_instance
 
-        processor.process_item(None, story_1_data)
+        processor.process_item(None, HackernewsStoryItem(**story_1_data))
 
         processor._db.get.assert_called_once_with('hackernews/item/11976079')
 

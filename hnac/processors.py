@@ -7,7 +7,7 @@ import couchdb
 from couchdb.http import HTTPError
 from sqlalchemy.exc import SQLAlchemyError
 
-from hnac.schemas import is_story_item
+from hnac.schemas import HackernewsStorySchema
 from hnac.models import HackernewsUser, Url, Story, HackernewsStoryItem
 from hnac.queues import (
     create_story_publisher_from_config, create_url_publisher_from_config
@@ -96,11 +96,11 @@ class CouchDBStorage(Processor):
             raise ItemProcessingError("failed to save story document")
 
     def process_item(self, source, item):
-        if not is_story_item(item):
+        if not isinstance(item, HackernewsStoryItem):
             logger.warning("item is not a story object")
             return
 
-        story_id = item["id"]
+        story_id = item.id
         doc_id = "hackernews/item/%d" % story_id
 
         doc = self._get_document(doc_id)
@@ -113,7 +113,16 @@ class CouchDBStorage(Processor):
             }
 
         doc["updated_at"] = current_time
-        doc["data"] = item
+
+        schema = HackernewsStorySchema()
+        serialization_result = schema.dump(item)
+        if serialization_result.errors:
+            logger.warning(
+                "failed to serialize story item: errors(%s)",
+                serialization_result.errors
+            )
+
+        doc["data"] = serialization_result.data
 
         logger.info("saving story with id %s to couchdb", story_id)
 
