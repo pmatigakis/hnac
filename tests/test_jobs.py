@@ -25,10 +25,10 @@ class JobTests(TestCase):
         result = job.run()
 
         self.assertFalse(result.failed)
-        source_instance.job_started.assert_called_once()
-        processor_instance.job_started.assert_called_once()
+        source_instance.job_started.assert_called_with(job)
+        processor_instance.job_started.assert_called_with(job)
 
-        source_instance.items.assert_called_once()
+        source_instance.items.assert_called_with()
 
         calls = [
             call(source_instance, 1),
@@ -38,8 +38,8 @@ class JobTests(TestCase):
 
         processor_instance.process_item.assert_has_calls(calls)
 
-        source_instance.job_finished.assert_called_once()
-        processor_instance.job_finished.assert_called_once()
+        source_instance.job_finished.assert_called_with(job)
+        processor_instance.job_finished.assert_called_with(job)
 
     def test_processor_raised_an_exception_while_processing_item(self):
         Source = MagicMock()
@@ -70,8 +70,14 @@ class JobTests(TestCase):
         result = job.run()
 
         self.assertFalse(result.failed)
-        processor_instance.process_item.assert_not_called()
-        source_instance.items.assert_called_once()
+        processor_instance.process_item.assert_has_calls(
+            [
+                call(source_instance, 1),
+                call(source_instance, 2),
+                call(source_instance, 3)
+            ]
+        )
+        source_instance.items.assert_called_with()
 
     @patch("hnac.jobs.Job._retrieve_and_process_items")
     def test_job_failed_because_a_job__execution_exception_was_raised(
@@ -86,7 +92,6 @@ class JobTests(TestCase):
 
         self.assertTrue(result.failed)
         processor_instance.process_item.assert_not_called()
-        source_instance.items.assert_called_once()
 
     def test_job_failed_because_the_source_raised_an_exception(self):
         source_instance = MagicMock()
@@ -99,7 +104,7 @@ class JobTests(TestCase):
 
         self.assertTrue(result.failed)
         processor_instance.process_item.assert_not_called()
-        source_instance.items.assert_called_once()
+        source_instance.items.assert_called_with()
 
 
 if __name__ == "__main__":
