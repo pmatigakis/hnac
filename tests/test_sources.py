@@ -5,6 +5,7 @@ from requests import RequestException
 
 from hnac.sources import HackernewsStories, RetryCountExceeded
 from hnac.exceptions import JobExecutionError
+from hnac.models import HackernewsStoryItem
 
 from mock_data import story_1_data, story_2_data
 
@@ -36,8 +37,8 @@ class HackernewsStoriesItemRetrieval(TestCase):
 
         self.assertEqual(len(stories), 2)
 
-        self.assertDictEqual(stories[0], story_1_data)
-        self.assertDictEqual(stories[1], story_2_data)
+        self.assertEqual(stories[0], HackernewsStoryItem(**story_1_data))
+        self.assertEqual(stories[1], HackernewsStoryItem(**story_2_data))
 
     @patch("hnac.sources.HackernewsStories._get_new_stories")
     def test_connection_retry_exceeded_while_retrieving_new_stories(

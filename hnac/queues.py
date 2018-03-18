@@ -1,7 +1,13 @@
 import json
+import logging
 
 import pika
 from pika.credentials import PlainCredentials
+
+from hnac.schemas import HackernewsStorySchema
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_story_publisher_from_config(config):
@@ -88,9 +94,15 @@ class RabbitMQStoryPublisher(RabbitMQPublisher):
 
         :param dict story_data: the story data
         """
-        encoded_story_data = json.dumps(story_data)
+        schema = HackernewsStorySchema()
+        serialization_result = schema.dumps(story_data)
+        if serialization_result.errors:
+            logger.warning(
+                "failed to serialize story: errors(%s)",
+                serialization_result.errors
+            )
 
-        self.publish_item(encoded_story_data)
+        self.publish_item(serialization_result.data)
 
 
 class RabbitMQUrlPublisher(RabbitMQPublisher):

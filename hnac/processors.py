@@ -247,11 +247,11 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
         return create_story_publisher_from_config(config)
 
     def process_item(self, source, item):
-        if not is_story_item(item):
+        if not isinstance(item, HackernewsStoryItem):
             logger.info("item is not a story object")
             return
 
-        logger.info("publishing story with id %s", item["id"])
+        logger.info("publishing story with id %s", item.id)
 
         self._publisher.publish_story(item)
 
@@ -264,13 +264,12 @@ class RabbitMQURLProcessor(RabbitMQProcessorBase):
         return create_url_publisher_from_config(config)
 
     def process_item(self, source, item):
-        if not is_story_item(item):
+        if not isinstance(item, HackernewsStoryItem):
             logger.info("item is not a story object")
             return
 
-        url = item.get("url")
-        if url is None:
-            logger.info("story with id %s doesn't contain a url", item["id"])
+        if item.url is None:
+            logger.info("story with id %s doesn't contain a url", item.id)
             return
 
-        self._publisher.publish_url(url)
+        self._publisher.publish_url(item.url)
