@@ -6,5 +6,5 @@ class JobExecutionError(HnacError):
     pass
 
 
-class ItemProcessingError(JobExecutionError):
+class ItemProcessingError(HnacError):
     pass
