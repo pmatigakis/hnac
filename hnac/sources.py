@@ -12,7 +12,7 @@ from hnac.firebase import create_hackernews_firebase_app
 logger = logging.getLogger(__name__)
 
 
-class RetryCountExceeded(Exception):
+class RetryCountExceeded(JobExecutionError):
     pass
 
 
@@ -82,9 +82,7 @@ class HackernewsStories(Source):
         sleep_for = self.wait_time - time_diff
 
         if sleep_for > 0.0:
-            logger.debug("sleeping due to throttling for %f seconds",
-                         sleep_for)
-
+            logger.info("sleeping due to throttling for %f seconds", sleep_for)
             sleep(sleep_for)
 
     def _get_new_stories(self):
@@ -93,12 +91,15 @@ class HackernewsStories(Source):
         while True:
             try:
                 return self._firebase.get("/v0/newstories", None)
-            except RequestException:
+            except RequestException as e:
                 logger.exception("Failed to fetch new story ids")
 
                 failure_count += 1
                 if failure_count > self.abort_after:
-                    raise RetryCountExceeded()
+                    logger.error(
+                        "maximum number of attempts to retrieve new stories "
+                        "has been reached")
+                    raise RetryCountExceeded() from e
 
                 sleep(self.backoff_time)
 
@@ -112,32 +113,24 @@ class HackernewsStories(Source):
                 self._last_request_time = time()
 
                 return self._firebase.get("/v0/item", story_id)
-            except RequestException:
+            except RequestException as e:
                 logger.exception("Failed to fetch story %d", story_id)
 
                 failure_count += 1
                 if failure_count > self.abort_after:
-                    raise RetryCountExceeded()
+                    logger.error(
+                        "maximum number of attempts to retrieve story data "
+                        "has been reached: story_id(%s)", story_id)
+                    raise RetryCountExceeded() from e
 
                 sleep(self.backoff_time)
 
     def items(self):
-        try:
-            story_ids = self._get_new_stories()
-        except RetryCountExceeded:
-            logger.error("Job stopped because maximum retry count has been "
-                         "exceeded while fetching new story id's")
-            raise JobExecutionError()
+        story_ids = self._get_new_stories()
 
         for story_id in story_ids:
             self._throttle()
-
-            try:
-                story_data = self._get_story_data(story_id)
-            except RetryCountExceeded:
-                logger.error("Job stopped because maximum retry count has "
-                             "been exceeded while fetching stories")
-                raise JobExecutionError()
+            story_data = self._get_story_data(story_id)
 
             if not is_story_item(story_data):
                 logger.warning("Hackernews item with id %d is not a story",
