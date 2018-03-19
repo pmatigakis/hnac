@@ -2,7 +2,7 @@ import logging
 from uuid import uuid4
 from datetime import datetime
 
-from hnac.sources import HackernewsStories
+from hnac.sources import HackernewsStories, SourceError
 from hnac.exceptions import JobExecutionError, ItemProcessingError
 
 
@@ -64,11 +64,10 @@ class Job(object):
             for item in self._source.items():
                 self._process_item_with_processors(item)
                 processed_item_count += 1
-        except Exception as e:
-            logger.exception(
-                "failed to retrieve and process items for job %s", self.id)
-            raise JobExecutionError(
-                "failed to retrieve and process items") from e
+        except SourceError as e:
+            logger.info(
+                "an error occurred while retrieving hackernews stories")
+            raise JobExecutionError("failed to retrieve items") from e
 
         return processed_item_count
 
@@ -85,6 +84,10 @@ class Job(object):
             processed_item_count = self._retrieve_and_process_items()
         except JobExecutionError:
             logger.info("Failed to execute job with id %s", self.id)
+            failed = True
+        except Exception:
+            logger.exception(
+                "failed to retrieve and process items for job %s", self.id)
             failed = True
         finally:
             self._notify_job_finished()

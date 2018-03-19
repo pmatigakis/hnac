@@ -3,8 +3,7 @@ from unittest.mock import patch, MagicMock, call
 
 from requests import RequestException
 
-from hnac.sources import HackernewsStories, RetryCountExceeded
-from hnac.exceptions import JobExecutionError
+from hnac.sources import HackernewsStories, SourceError
 from hnac.models import HackernewsStoryItem
 
 from mock_data import story_1_data, story_2_data
@@ -40,13 +39,16 @@ class HackernewsStoriesItemRetrieval(TestCase):
         self.assertEqual(stories[0], HackernewsStoryItem(**story_1_data))
         self.assertEqual(stories[1], HackernewsStoryItem(**story_2_data))
 
-    @patch("hnac.sources.HackernewsStories._get_new_stories")
+    @patch("hnac.sources.sleep")
+    @patch("hnac.sources.HackernewsStories._execute_new_stories_request")
     def test_connection_retry_exceeded_while_retrieving_new_stories(
-            self, get_new_stories_mock):
-        get_new_stories_mock.side_effect = RetryCountExceeded
+            self, _execute_new_stories_request_mock, sleep_mock):
+        _execute_new_stories_request_mock.side_effect = RequestException
+        sleep_mock.return_value = None
+
         source = HackernewsStories()
 
-        with self.assertRaises(JobExecutionError):
+        with self.assertRaises(SourceError):
             [item for item in source.items()]
 
     @patch("hnac.sources.HackernewsStories._get_story_data")
@@ -92,7 +94,7 @@ class HackernewsStoriesItemRetrieval(TestCase):
 
         source = HackernewsStories()
 
-        with self.assertRaises(JobExecutionError):
+        with self.assertRaises(SourceError):
             [item for item in source.items()]
 
         instance.get.assert_has_calls(
@@ -121,7 +123,7 @@ class HackernewsStoriesItemRetrieval(TestCase):
 
         source = HackernewsStories()
 
-        with self.assertRaises(JobExecutionError):
+        with self.assertRaises(SourceError):
             [item for item in source.items()]
 
         instance.get.assert_has_calls(

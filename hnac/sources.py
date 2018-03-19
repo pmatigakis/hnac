@@ -5,14 +5,18 @@ from time import time, sleep
 from requests import RequestException
 
 from hnac.schemas import is_story_item, HackernewsStorySchema
-from hnac.exceptions import JobExecutionError
+from hnac.exceptions import HnacError
 from hnac.firebase import create_hackernews_firebase_app
 
 
 logger = logging.getLogger(__name__)
 
 
-class RetryCountExceeded(JobExecutionError):
+class SourceError(HnacError):
+    pass
+
+
+class RetryCountExceeded(SourceError):
     pass
 
 
@@ -85,12 +89,15 @@ class HackernewsStories(Source):
             logger.info("sleeping due to throttling for %f seconds", sleep_for)
             sleep(sleep_for)
 
+    def _execute_new_stories_request(self):
+        return self._firebase.get("/v0/newstories", None)
+
     def _get_new_stories(self):
         failure_count = 0
 
         while True:
             try:
-                return self._firebase.get("/v0/newstories", None)
+                return self._execute_new_stories_request()
             except RequestException as e:
                 logger.exception("Failed to fetch new story ids")
 
