@@ -9,10 +9,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.schemas import HackernewsStorySchema
 from hnac.models import HackernewsUser, Url, Story, HackernewsStoryItem
-from hnac.queues import (
-    create_story_publisher_from_config, create_url_publisher_from_config
-)
+from hnac.queues import create_publisher
 from hnac.exceptions import ItemProcessingError
+from hnac.messages import StoryDocumentMessage, UrlDocumentMessage
 
 
 logger = logging.getLogger(__name__)
@@ -248,21 +247,60 @@ class RabbitMQProcessorBase(Processor):
         """
         pass
 
+    @abstractmethod
+    def _create_message(self, item):
+        """Create a message to be transmitted using data from the hackernews
+        item
+
+        :param object item: the hackernews item
+        :rtype: MessageBase
+        :return: the message to transmit
+        """
+        pass
+
+    def process_item(self, source, item):
+        """Process the given item
+
+        :param Source source: the source that returned this item
+        :param object item: the hackernews item to process
+        """
+        message = self._create_message(item)
+        self._publisher.publish_message(message)
+
 
 class RabbitMQStoryProcessor(RabbitMQProcessorBase):
     """Processor that published the hackernews stories to a RabbitMQ server"""
 
     def _create_publisher(self, config):
-        return create_story_publisher_from_config(config)
+        return create_publisher(
+            host=config["RABBITMQ_STORY_PROCESSOR_HOST"],
+            port=config.get("RABBITMQ_STORY_PROCESSOR_PORT"),
+            username=config.get("RABBITMQ_STORY_PROCESSOR_USERNAME"),
+            password=config.get("RABBITMQ_STORY_PROCESSOR_PASSWORD"),
+            exchange=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE"],
+            routing_key=config["RABBITMQ_STORY_PROCESSOR_ROUTING_KEY"]
+        )
 
-    def process_item(self, source, item):
+    def _create_message(self, item):
         if not isinstance(item, HackernewsStoryItem):
             logger.info("item is not a story object")
             return
 
         logger.info("publishing story with id %s", item.id)
 
-        self._publisher.publish_story(item)
+        schema = HackernewsStorySchema()
+        serialization_result = schema.dumps(item)
+        if serialization_result.errors:
+            logger.warning(
+                "failed to serialize story: errors(%s)",
+                serialization_result.errors
+            )
+
+            raise ItemProcessingError("failed to serialize story data")
+
+        return StoryDocumentMessage(
+            story=serialization_result.data
+        )
 
 
 class RabbitMQURLProcessor(RabbitMQProcessorBase):
@@ -270,15 +308,22 @@ class RabbitMQURLProcessor(RabbitMQProcessorBase):
     server"""
 
     def _create_publisher(self, config):
-        return create_url_publisher_from_config(config)
+        return create_publisher(
+            host=config["RABBITMQ_URL_PROCESSOR_HOST"],
+            port=config.get("RABBITMQ_URL_PROCESSOR_PORT"),
+            username=config.get("RABBITMQ_URL_PROCESSOR_USERNAME"),
+            password=config.get("RABBITMQ_URL_PROCESSOR_PASSWORD"),
+            exchange=config["RABBITMQ_URL_PROCESSOR_EXCHANGE"],
+            routing_key=config["RABBITMQ_URL_PROCESSOR_ROUTING_KEY"]
+        )
 
-    def process_item(self, source, item):
+    def _create_message(self, item):
         if not isinstance(item, HackernewsStoryItem):
             logger.info("item is not a story object")
             return
 
         if item.url is None:
             logger.info("story with id %s doesn't contain a url", item.id)
-            return
+            raise ItemProcessingError("story doesn't contain a url")
 
-        self._publisher.publish_url(item.url)
+        return UrlDocumentMessage(item.url)
