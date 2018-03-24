@@ -289,7 +289,7 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
         logger.info("publishing story with id %s", item.id)
 
         schema = HackernewsStorySchema()
-        serialization_result = schema.dumps(item)
+        serialization_result = schema.dump(item)
         if serialization_result.errors:
             logger.warning(
                 "failed to serialize story: errors(%s)",
