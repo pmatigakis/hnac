@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 import json
 
+import arrow
+
 
 class MessageBase(metaclass=ABCMeta):
     """RabbitMQ message base"""
@@ -37,12 +39,20 @@ class UrlDocumentMessage(JsonDocumentMessageBase):
 
     def __init__(self, url):
         self.url = url
+        self.source = "hackernews-api"
+        self.created_at = arrow.utcnow()
 
     def to_json(self):
         return {
             "type": "url",
+            "created_at": self.created_at.format('YYYY-MM-DD HH:mm:ss ZZ'),
+            "created_at_timestamp": self.created_at.timestamp,
             "data": {
                 "url": self.url
+            },
+            "meta": {
+                "source": self.source,
+                "retrieved_by": "hnac"
             }
         }
 
@@ -52,9 +62,17 @@ class StoryDocumentMessage(JsonDocumentMessageBase):
 
     def __init__(self, story):
         self.story = story
+        self.source = "hackernews-api"
+        self.created_at = arrow.utcnow()
 
     def to_json(self):
         return {
             "type": "story",
-            "data": self.story
+            "data": self.story,
+            "created_at": self.created_at.format('YYYY-MM-DD HH:mm:ss ZZ'),
+            "created_at_timestamp": self.created_at.timestamp,
+            "meta": {
+                "source": self.source,
+                "retrieved_by": "hnac"
+            }
         }

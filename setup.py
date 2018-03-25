@@ -25,7 +25,8 @@ setup(
         "psycopg2==2.7.3.2",
         "Flask-Admin==1.4.2",
         "uWSGI==2.0.14",
-        "pika==0.10.0"
+        "pika==0.10.0",
+        "arrow==0.12.1"
     ],
     
     tests_require=[
