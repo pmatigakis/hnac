@@ -242,6 +242,25 @@ class Story(Base):
     def get_latest(cls, session, count=20):
         return session.query(cls).order_by(desc(cls.time)).limit(count)
 
+    @classmethod
+    def get_stories(cls, session, offset=0, limit=500):
+        return session.query(cls) \
+                      .order_by(cls.id) \
+                      .offset(offset) \
+                      .limit(limit) \
+                      .all()
+
+    def as_dict(self):
+        return {
+            "id": self.story_id,
+            "title": self.title,
+            "url": self.url.url,
+            "time": self.time,
+            "by": self.hackernews_user.username,
+            "score": self.score,
+            "descendants": self.descendants
+        }
+
 
 HackernewsStoryItem = namedtuple(
     "HackernewsStoryItem",

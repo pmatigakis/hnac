@@ -71,7 +71,7 @@ class JWTAuthenticationTests(WebTestCaseWithUserAccount):
 
 
 class ProtectedAPIEndpointAccessTests(WebTestCaseWithUserAccount):
-    @patch("hnac.web.apis.stories.Stories._get_stories")
+    @patch("hnac.web.apis.stories.Story.get_stories")
     def test_access_protected_endpoint(self, get_stories_mock):
         get_stories_mock.return_value = []
 
