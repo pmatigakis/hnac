@@ -199,8 +199,8 @@ class Story(Base):
         nullable=False
     )
     title = Column(String(512), nullable=False)
-    score = Column(Integer, nullable=False)
-    time = Column(Integer, nullable=False)
+    score = Column(Integer, nullable=False, index=True)
+    time = Column(Integer, nullable=False, index=True)
     descendants = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=False), nullable=False)
     updated_at = Column(DateTime(timezone=False), nullable=False)
@@ -243,9 +243,14 @@ class Story(Base):
         return session.query(cls).order_by(desc(cls.time)).limit(count)
 
     @classmethod
-    def get_stories(cls, session, offset=0, limit=500):
+    def get_stories(cls, session, offset=0, limit=500, order_by=None,
+                    sort_desc=False):
+        order_by = order_by or cls.id
+        if sort_desc:
+            order_by = desc(order_by)
+
         return session.query(cls) \
-                      .order_by(cls.id) \
+                      .order_by(order_by) \
                       .offset(offset) \
                       .limit(limit) \
                       .all()

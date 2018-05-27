@@ -21,7 +21,19 @@ class Stories(Resource):
         logger.info(
             "retrieving stories offset=%s limit=%s", args.offset, args.limit)
 
-        stories = Story.get_stories(session, args.offset, args.limit)
+        order_by_mappings = {
+            "id": Story.story_id,
+            "time": Story.time,
+            "score": Story.score
+        }
+
+        stories = Story.get_stories(
+            session=session,
+            offset=args.offset,
+            limit=args.limit,
+            order_by=order_by_mappings[args.order_by],
+            sort_desc=args.desc
+        )
 
         return [
             story.as_dict()
