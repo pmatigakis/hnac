@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from hnac.cli.commands.crawler import Crawl
 from hnac.models import Report as ReportModel
-from hnac.web import session
+from hnac.web.database import db
 from hnac.jobs import JobExecutionResult
 
 from common import WebTestCase
@@ -36,7 +36,7 @@ class CrawlTests(WebTestCase):
         with self.app.app_context():
             crawl.run()
 
-            report = session.query(ReportModel).one()
+            report = db.session.query(ReportModel).one()
 
             self.assertIsNotNone(report)
 

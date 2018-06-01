@@ -3,83 +3,71 @@ from os.path import abspath, dirname, join
 from unittest import TestCase
 import json
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 
-from hnac.models import Base, User, Report
+from hnac.models import User, Report
 from hnac.jobs import JobExecutionResult, Job
 from hnac.web.app import create_app
-from hnac.web import session
+from hnac.web.database import db
 
 
 class ModelTestCase(TestCase):
     def setUp(self):
-        self.engine = create_engine("sqlite:///:memory:")
+        settings_path = join(dirname(abspath(__file__)), "settings.py")
+        self.app = create_app("testing", settings_path)
 
-        Base.metadata.create_all(self.engine)
-
-        self.Session = scoped_session(sessionmaker(bind=self.engine))
-
-        self.session = self.Session()
-
-    def tearDown(self):
-        self.session.close()
-
-        self.Session.remove()
+        with self.app.app_context():
+            db.create_all()
 
 
 class ModelTestCaseWithMockData(ModelTestCase):
     def setUp(self):
         super(ModelTestCaseWithMockData, self).setUp()
 
-        session = self.Session()
-
         self.test_user_username = "user1"
         self.test_user_password = "password"
 
-        user = User.create(session, self.test_user_username,
-                           self.test_user_password)
-        user.id = 1
+        with self.app.app_context():
+            user = User.create(db.session, self.test_user_username,
+                               self.test_user_password)
+            user.id = 1
 
-        job_1 = Job(None, None)
-        job_1.id = "job_1_uuid"
-        job_1_start_time = datetime(2016, 5, 6, 12, 0, 0)
-        job_1_end_time = job_1_start_time + timedelta(seconds=40)
-        report_1 = JobExecutionResult(
-            job=job_1,
-            start_time=job_1_start_time,
-            end_time=job_1_end_time,
-            failed=True,
-            processed_item_count=5
-        )
+            job_1 = Job(None, None)
+            job_1.id = "job_1_uuid"
+            job_1_start_time = datetime(2016, 5, 6, 12, 0, 0)
+            job_1_end_time = job_1_start_time + timedelta(seconds=40)
+            report_1 = JobExecutionResult(
+                job=job_1,
+                start_time=job_1_start_time,
+                end_time=job_1_end_time,
+                failed=True,
+                processed_item_count=5
+            )
 
-        Report.save_report(self.session, report_1)
+            Report.save_report(db.session, report_1)
 
-        job_2 = Job(None, None)
-        job_2.id = "job_2_uuid"
-        job_2_start_time = datetime(2016, 5, 6, 15, 0, 0)
-        job_2_end_time = job_1_start_time + timedelta(seconds=40)
-        report_2 = JobExecutionResult(
-            job=job_2,
-            start_time=job_2_start_time,
-            end_time=job_2_end_time,
-            failed=False,
-            processed_item_count=11
-        )
+            job_2 = Job(None, None)
+            job_2.id = "job_2_uuid"
+            job_2_start_time = datetime(2016, 5, 6, 15, 0, 0)
+            job_2_end_time = job_1_start_time + timedelta(seconds=40)
+            report_2 = JobExecutionResult(
+                job=job_2,
+                start_time=job_2_start_time,
+                end_time=job_2_end_time,
+                failed=False,
+                processed_item_count=11
+            )
 
-        Report.save_report(self.session, report_2)
+            Report.save_report(db.session, report_2)
 
-        try:
-            session.commit()
+            try:
+                db.session.commit()
 
-            self.test_user_id = user.id
-            self.test_user_jti = user.jti
-        except SQLAlchemyError:
-            session.rollback()
-            self.fail("failed to load mock data")
-
-        session.close()
+                self.test_user_id = user.id
+                self.test_user_jti = user.jti
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to load mock data")
 
 
 class WebTestCase(TestCase):
@@ -87,17 +75,10 @@ class WebTestCase(TestCase):
         settings_path = join(dirname(abspath(__file__)), "settings.py")
         self.app = create_app("testing", settings_path)
 
-        engine = session.get_bind()
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
+        with self.app.app_context():
+            db.create_all()
 
         self.client = self.app.test_client()
-
-    def tearDown(self):
-        engine = session.get_bind()
-        Base.metadata.drop_all(engine)
-
-        session.remove()
 
     def authenticate_using_jwt(self, username, password):
         headers = {
@@ -124,17 +105,18 @@ class WebTestCaseWithUserAccount(WebTestCase):
         self.test_user_username = "user1"
         self.test_user_password = "password"
 
-        user1 = User.create(session, self.test_user_username,
-                            self.test_user_password)
+        with self.app.app_context():
+            user1 = User.create(db.session, self.test_user_username,
+                                self.test_user_password)
 
-        try:
-            session.commit()
+            try:
+                db.session.commit()
 
-            self.test_user_id = user1.id
-            self.test_user_jti = user1.jti
-        except SQLAlchemyError as e:
-            session.rollback()
-            self.fail("failed to load mock data")
+                self.test_user_id = user1.id
+                self.test_user_jti = user1.jti
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                self.fail("failed to load mock data")
 
 
 class CommandTestCase(WebTestCase):

@@ -12,7 +12,6 @@ setup(
 
     install_requires=[
         "python-firebase==1.2",
-        "SQLAlchemy==1.0.13",
         "Flask==0.11.1",
         "marshmallow==2.10.1",
         "Flask-Script==2.0.5",
@@ -26,7 +25,8 @@ setup(
         "Flask-Admin==1.4.2",
         "uWSGI==2.0.14",
         "pika==0.10.0",
-        "arrow==0.12.1"
+        "arrow==0.12.1",
+        "Flask-SQLAlchemy==2.3.2"
     ],
     
     tests_require=[

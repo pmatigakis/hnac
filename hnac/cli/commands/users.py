@@ -1,7 +1,7 @@
 from flask_script import Command, Option
 
 from hnac.models import User
-from hnac.web import session
+from hnac.web.database import db
 
 
 class CreateAPIUser(Command):
@@ -13,16 +13,16 @@ class CreateAPIUser(Command):
     )
 
     def run(self, username, password):
-        user = User.get_by_username(session, username)
+        user = User.get_by_username(db.session, username)
 
         if user:
             print("User '{}' already exists".format(username))
 
             return
 
-        user = User.create(session, username, password)
+        user = User.create(db.session, username, password)
 
-        session.commit()
+        db.session.commit()
 
         print("Added user {}".format(user.username))
 
@@ -35,13 +35,13 @@ class DeleteAPIUser(Command):
     )
 
     def run(self, username):
-        user = User.delete(session, username)
+        user = User.delete(db.session, username)
 
         if not user:
             print("User {} doesn't exist".format(username))
             return
 
-        session.commit()
+        db.session.commit()
 
         print("Removed user {}".format(username))
 
@@ -51,7 +51,7 @@ class ListAPIUsers(Command):
 
     def run(self):
         print("Username\t\tRegistered at")
-        for user in session.query(User).all():
+        for user in db.session.query(User).all():
             msg = "{username}\t\t{registered_at}"
             print(msg.format(username=user.username,
                              registered_at=user.registered_at))
@@ -66,7 +66,7 @@ class ChangeAPIUserPassword(Command):
     )
 
     def run(self, username, password):
-        user = User.get_by_username(session, username)
+        user = User.get_by_username(db.session, username)
 
         if not user:
             print("User {} doesn't exist".format(username))
@@ -74,6 +74,6 @@ class ChangeAPIUserPassword(Command):
 
         user.change_password(password)
 
-        session.commit()
+        db.session.commit()
 
         print("Change password for user '{}'".format(user.username))

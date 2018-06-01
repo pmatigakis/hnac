@@ -3,7 +3,7 @@ import logging
 from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 
-from hnac.web import session
+from hnac.web.database import db
 from hnac.web.forms import LoginForm
 from hnac.models import User, Report, Story
 
@@ -19,7 +19,7 @@ blueprint = Blueprint("frontend", __name__)
 def index():
     latest_stories = []
 
-    for story in Story.get_latest(session, 10):
+    for story in Story.get_latest(db.session, 10):
         story = {
             "by": story.hackernews_user.username,
             "id": story.story_id,
@@ -32,10 +32,10 @@ def index():
 
         latest_stories.append(story)
 
-    latest_reports = Report.get_latest(session)
+    latest_reports = Report.get_latest(db.session)
 
     return render_template("index.html",
-                           story_count=Story.count(session),
+                           story_count=Story.count(db.session),
                            latest_stories=latest_stories,
                            latest_reports=latest_reports)
 
@@ -50,7 +50,7 @@ def login():
 
         logger.info("logging in user %s}", username)
 
-        user = User.authenticate(session, username, password)
+        user = User.authenticate(db.session, username, password)
 
         if not user:
             logger.warning("failed to authenticate user %s", username)

@@ -2,28 +2,23 @@ from datetime import datetime
 from uuid import uuid4
 from collections import namedtuple
 
-from sqlalchemy import (Column, String, Integer, DateTime, Boolean, Sequence,
-                        desc, ForeignKey)
-from sqlalchemy.orm import relationship
-
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
 
+from hnac.web.database import db
 
-Base = declarative_base()
 
-
-class User(Base, UserMixin):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
 
-    id = Column(
-        Integer, Sequence("users_id_seq"), nullable=False, primary_key=True)
-    username = Column(String(40), nullable=False, unique=True)
-    password = Column(String(256), nullable=False)
-    registered_at = Column(DateTime(timezone=False), nullable=False)
-    active = Column(Boolean, nullable=False)
-    jti = Column(String(32), nullable=False)
+    id = db.Column(
+        db.Integer, db.Sequence("users_id_seq"), nullable=False,
+        primary_key=True)
+    username = db.Column(db.String(40), nullable=False, unique=True)
+    password = db.Column(db.String(256), nullable=False)
+    registered_at = db.Column(db.DateTime(timezone=False), nullable=False)
+    active = db.Column(db.Boolean, nullable=False)
+    jti = db.Column(db.String(32), nullable=False)
 
     @classmethod
     def get_by_username(cls, session, username):
@@ -78,17 +73,17 @@ class User(Base, UserMixin):
         self.jti = uuid4().hex
 
 
-class Report(Base):
+class Report(db.Model):
     __tablename__ = "reports"
 
-    id = Column(Integer, Sequence("reports_id_seq"),
-                nullable=False, primary_key=True)
+    id = db.Column(db.Integer, db.Sequence("reports_id_seq"),
+                   nullable=False, primary_key=True)
 
-    job_id = Column(String(32), nullable=False)
-    started_at = Column(DateTime(timezone=False), nullable=False)
-    completed_at = Column(DateTime(timezone=False), nullable=False)
-    failed = Column(Boolean, nullable=False, default=False)
-    num_processed_items = Column(Integer, nullable=False)
+    job_id = db.Column(db.String(32), nullable=False)
+    started_at = db.Column(db.DateTime(timezone=False), nullable=False)
+    completed_at = db.Column(db.DateTime(timezone=False), nullable=False)
+    failed = db.Column(db.Boolean, nullable=False, default=False)
+    num_processed_items = db.Column(db.Integer, nullable=False)
 
     @classmethod
     def save_report(cls, session, job_execution_result):
@@ -107,16 +102,16 @@ class Report(Base):
     @classmethod
     def get_latest(cls, session, count=10):
         return session.query(cls)\
-                      .order_by(desc(cls.started_at))\
+                      .order_by(db.desc(cls.started_at))\
                       .limit(count).all()
 
 
-class HackernewsUser(Base):
+class HackernewsUser(db.Model):
     __tablename__ = "hackernews_users"
 
-    id = Column(Integer, nullable=False, primary_key=True)
-    username = Column(String(40), nullable=False, unique=True)
-    created_at = Column(DateTime(timezone=False), nullable=False)
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    username = db.Column(db.String(40), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime(timezone=False), nullable=False)
 
     @classmethod
     def create(cls, session, username):
@@ -143,12 +138,12 @@ class HackernewsUser(Base):
         return user
 
 
-class Url(Base):
+class Url(db.Model):
     __tablename__ = "urls"
 
-    id = Column(Integer, nullable=False, primary_key=True)
-    url = Column(String(2048), nullable=False, unique=True)
-    created_at = Column(DateTime(timezone=False))
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    url = db.Column(db.String(2048), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime(timezone=False))
 
     @classmethod
     def create(cls, session, url):
@@ -175,38 +170,38 @@ class Url(Base):
         return url_object
 
 
-class Story(Base):
+class Story(db.Model):
     __tablename__ = "stories"
 
-    id = Column(Integer, nullable=False, primary_key=True)
-    story_id = Column(Integer, nullable=False, unique=True)
-    hackernews_user_id = Column(
-        Integer,
-        ForeignKey(
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    story_id = db.Column(db.Integer, nullable=False, unique=True)
+    hackernews_user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
             "hackernews_users.id",
             ondelete="CASCADE",
             onupdate="CASCADE"
         ),
         nullable=False
     )
-    url_id = Column(
-        Integer,
-        ForeignKey(
+    url_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
             "urls.id",
             ondelete="CASCADE",
             onupdate="CASCADE"
         ),
         nullable=False
     )
-    title = Column(String(512), nullable=False)
-    score = Column(Integer, nullable=False, index=True)
-    time = Column(Integer, nullable=False, index=True)
-    descendants = Column(Integer, nullable=False)
-    created_at = Column(DateTime(timezone=False), nullable=False)
-    updated_at = Column(DateTime(timezone=False), nullable=False)
+    title = db.Column(db.String(512), nullable=False)
+    score = db.Column(db.Integer, nullable=False, index=True)
+    time = db.Column(db.Integer, nullable=False, index=True)
+    descendants = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=False), nullable=False)
+    updated_at = db.Column(db.DateTime(timezone=False), nullable=False)
 
-    hackernews_user = relationship("HackernewsUser")
-    url = relationship("Url")
+    hackernews_user = db.relationship("HackernewsUser")
+    url = db.relationship("Url")
 
     @classmethod
     def create(cls, session, user, url, story_id, title, score, time,
@@ -240,14 +235,14 @@ class Story(Base):
 
     @classmethod
     def get_latest(cls, session, count=20):
-        return session.query(cls).order_by(desc(cls.time)).limit(count)
+        return session.query(cls).order_by(db.desc(cls.time)).limit(count)
 
     @classmethod
     def get_stories(cls, session, offset=0, limit=500, order_by=None,
                     sort_desc=False):
         order_by = order_by or cls.id
         if sort_desc:
-            order_by = desc(order_by)
+            order_by = db.desc(order_by)
 
         return session.query(cls) \
                       .order_by(order_by) \

@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 
 from hnac.cli.commands.users import (CreateAPIUser, DeleteAPIUser,
                                      ChangeAPIUserPassword)
-from hnac.web import session
+from hnac.web.database import db
 from hnac.models import User
 
 from common import CommandTestCase, CommandTestCaseWithMockData
@@ -17,27 +17,31 @@ class CreateAPIUserTests(CommandTestCase):
 
         command = CreateAPIUser()
 
-        command.run(USERNAME, PASSWORD)
+        with self.app.app_context():
+            command.run(USERNAME, PASSWORD)
 
-        user = session.query(User).filter_by(username=USERNAME).one_or_none()
+            user = db.session.query(User) \
+                             .filter_by(username=USERNAME) \
+                             .one_or_none()
 
-        self.assertIsNotNone(user)
-        self.assertIsNotNone(user.id)
-        self.assertEqual(user.username, USERNAME)
-        self.assertTrue(check_password_hash(user.password, PASSWORD))
+            self.assertIsNotNone(user)
+            self.assertIsNotNone(user.id)
+            self.assertEqual(user.username, USERNAME)
+            self.assertTrue(check_password_hash(user.password, PASSWORD))
 
 
 class DeleteAPIUserTests(CommandTestCaseWithMockData):
     def test_delete_user(self):
         command = DeleteAPIUser()
 
-        command.run(self.test_user_username)
+        with self.app.app_context():
+            command.run(self.test_user_username)
 
-        user = session.query(User)\
-                      .filter_by(username=self.test_user_username)\
-                      .one_or_none()
+            user = db.session.query(User)\
+                             .filter_by(username=self.test_user_username)\
+                             .one_or_none()
 
-        self.assertIsNone(user)
+            self.assertIsNone(user)
 
 
 class ChangeAPIUserPasswordTests(CommandTestCaseWithMockData):
@@ -46,16 +50,17 @@ class ChangeAPIUserPasswordTests(CommandTestCaseWithMockData):
 
         new_password = "password2"
 
-        command.run(self.test_user_username, new_password)
+        with self.app.app_context():
+            command.run(self.test_user_username, new_password)
 
-        user = session.query(User)\
-                      .filter_by(username=self.test_user_username)\
-                      .one_or_none()
+            user = db.session.query(User)\
+                             .filter_by(username=self.test_user_username)\
+                             .one_or_none()
 
-        self.assertIsNotNone(user)
-        self.assertIsNotNone(user.id)
-        self.assertEqual(user.username, self.test_user_username)
-        self.assertTrue(check_password_hash(user.password, new_password))
+            self.assertIsNotNone(user)
+            self.assertIsNotNone(user.id)
+            self.assertEqual(user.username, self.test_user_username)
+            self.assertTrue(check_password_hash(user.password, new_password))
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ from flask_jwt import jwt_required
 
 from hnac.web.apis.arguments import story_list_query_parser
 from hnac.web.apis import models
-from hnac.web import session
+from hnac.web.database import db
 from hnac.models import Story
 
 
@@ -28,7 +28,7 @@ class Stories(Resource):
         }
 
         stories = Story.get_stories(
-            session=session,
+            session=db.session,
             offset=args.offset,
             limit=args.limit,
             order_by=order_by_mappings[args.order_by],
@@ -47,7 +47,7 @@ class StoryDetails(Resource):
     def get(self, story_id):
         logger.info("retrieving story with id %s", story_id)
 
-        story = Story.get_by_story_id(session, story_id)
+        story = Story.get_by_story_id(db.session, story_id)
 
         if not story:
             logger.warning("story with id %s doesn't exist", story_id)

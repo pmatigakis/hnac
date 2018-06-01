@@ -3,7 +3,7 @@ from unittest.mock import patch
 import json
 
 from hnac.models import User
-from hnac.web import session
+from hnac.web.database import db
 
 from common import WebTestCaseWithUserAccount
 
@@ -93,12 +93,12 @@ class ProtectedAPIEndpointAccessTests(WebTestCaseWithUserAccount):
                                             self.test_user_password)
 
         with self.app.app_context():
-            user = User.get_by_username(session, "user1")
+            user = User.get_by_username(db.session, "user1")
             user.reset_token_identifier()
             try:
-                session.commit()
+                db.session.commit()
             except Exception:
-                session.rollback()
+                db.session.rollback()
                 self.fail("Failed to reset the user jti")
 
         headers = {
