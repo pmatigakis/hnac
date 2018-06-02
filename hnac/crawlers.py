@@ -1,7 +1,7 @@
 import logging
 
 from hnac.jobs import HackernewsCrawlJob
-from hnac.processors import SQLAlchemyStorage
+from hnac.processors import SQLAlchemyStorage, Processors
 from hnac.utilities.modules import import_string
 
 
@@ -17,13 +17,13 @@ def create_hackernews_api_crawler_job(config, session):
     :return: the job object
     """
     logger.info("Initializing data processors")
-    processors = [SQLAlchemyStorage(session)]
-    processors.extend([
+    processors = Processors()
+    processors.add(SQLAlchemyStorage(session))
+    processors.add_multiple([
         import_string(processor)() for processor in config["PROCESSORS"]
     ])
+    processors.configure_all(config)
 
-    for processor in processors:
-        processor.configure(config)
     logger.info("Data processors initialized")
 
     job = HackernewsCrawlJob(config, processors)

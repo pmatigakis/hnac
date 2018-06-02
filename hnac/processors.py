@@ -327,3 +327,88 @@ class RabbitMQURLProcessor(RabbitMQProcessorBase):
             raise ItemProcessingError("story doesn't contain a url")
 
         return UrlDocumentMessage(item.url)
+
+
+class Processors(object):
+    """Processor collection object"""
+
+    def __init__(self):
+        self._processors = []
+
+    @property
+    def count(self):
+        """Return the number of processors
+
+        :rtype: int
+        :return: the number of processors
+        """
+        return len(self._processors)
+
+    def get(self, index):
+        """Get a processor by index
+
+        :param int index: the processor index
+        :rtype: Processor
+        :return: the processor
+        """
+        return self._processors[index]
+
+    def remove(self, index):
+        """Remove a processor by index
+
+        :param int index: the processor index
+        """
+        self._processors.pop(index)
+
+    def add(self, processor):
+        """Add a processor to the collection
+
+        :param Processor processor: a processor object
+        """
+        self._processors.append(processor)
+
+    def add_multiple(self, processors):
+        """Add multiple processors to the collection
+
+        :param list[Processor] processors: a list of processor objects
+        """
+        self._processors.extend(processors)
+
+    def configure_all(self, config):
+        """Configure the processors
+
+        :param dict config: the configuration dictionary
+        """
+        for processor in self._processors:
+            processor.configure(config)
+
+    def job_started(self, job):
+        """Notify the processors that a job started
+
+        :param Job job: the job that was started
+        """
+        for processor in self._processors:
+            processor.job_started(job)
+
+    def job_finished(self, job):
+        """Notify the processors that the job has finished
+
+        :param Job job: the finished job
+        """
+        for processor in self._processors:
+            processor.job_finished(job)
+
+    def process_item(self, source, item):
+        """Use the processors to process the given item
+
+        :param Source source: the source that generated the item
+        :param HackernewsStoryItem item: the item to process
+        """
+        for processor in self._processors:
+            try:
+                processor.process_item(source, item)
+            except ItemProcessingError:
+                logger.info("processor %s failed to process item",
+                            type(processor))
+            except Exception:
+                logger.exception("processor failed to process item")

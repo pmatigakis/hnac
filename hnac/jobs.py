@@ -3,7 +3,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from hnac.sources import HackernewsStories, SourceError
-from hnac.exceptions import JobExecutionError, ItemProcessingError
+from hnac.exceptions import JobExecutionError
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class Job(object):
         """Create a new Job object
 
         :param Source source: the hackernews source object to use
-        :param list[Processor] processors: the hackernews item processors
+        :param Processors processors: the hackernews item processors
         """
         self._source = source
         self._processors = processors
@@ -35,34 +35,18 @@ class Job(object):
 
     def _notify_job_started(self):
         self._source.job_started(self)
-
-        for processor in self._processors:
-            processor.job_started(self)
+        self._processors.job_started(self)
 
     def _notify_job_finished(self):
         self._source.job_finished(self)
-
-        for processor in self._processors:
-            processor.job_finished(self)
-
-    def _process_item(self, processor, item):
-        try:
-            processor.process_item(self._source, item)
-        except ItemProcessingError:
-            logger.info("processor %s failed to process item", type(processor))
-        except Exception:
-            logger.exception("processor failed to process item")
-
-    def _process_item_with_processors(self, item):
-        for processor in self._processors:
-            self._process_item(processor, item)
+        self._processors.job_finished(self)
 
     def _retrieve_and_process_items(self):
         processed_item_count = 0
 
         try:
             for item in self._source.items():
-                self._process_item_with_processors(item)
+                self._processors.process_item(self._source, item)
                 processed_item_count += 1
         except SourceError as e:
             logger.info(
@@ -111,7 +95,7 @@ class HackernewsCrawlJob(Job):
         """Create a new HackernewsCrawlJob object
 
         :param dict config: the job configuration
-        :param list[Processor] processors: the hackernews item processors
+        :param Processors processors: the hackernews item processors
         """
         source = HackernewsStories()
         source.configure(config)

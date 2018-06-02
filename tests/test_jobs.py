@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, call, patch
 
 from hnac.jobs import Job
 from hnac.exceptions import ItemProcessingError, JobExecutionError
+from hnac.processors import Processors
 
 
 class JobTests(TestCase):
@@ -20,7 +21,10 @@ class JobTests(TestCase):
         processor_instance.job_started = MagicMock()
         processor_instance.job_finished = MagicMock()
 
-        job = Job(source_instance, [processor_instance])
+        processors = Processors()
+        processors.add(processor_instance)
+
+        job = Job(source_instance, processors)
 
         result = job.run()
 
@@ -53,7 +57,10 @@ class JobTests(TestCase):
         processor_instance.process_item = MagicMock()
         processor_instance.process_item.side_effect = ValueError
 
-        job = Job(source_instance, [processor_instance])
+        processors = Processors()
+        processors.add(processor_instance)
+
+        job = Job(source_instance, processors)
 
         result = job.run()
 
@@ -66,7 +73,10 @@ class JobTests(TestCase):
         processor_instance = MagicMock()
         processor_instance.process_item.side_effect = ItemProcessingError
 
-        job = Job(source_instance, [processor_instance])
+        processors = Processors()
+        processors.add(processor_instance)
+
+        job = Job(source_instance, processors)
         result = job.run()
 
         self.assertFalse(result.failed)
@@ -80,14 +90,16 @@ class JobTests(TestCase):
         source_instance.items.assert_called_with()
 
     @patch("hnac.jobs.Job._retrieve_and_process_items")
-    def test_job_failed_because_a_job__execution_exception_was_raised(
+    def test_job_failed_because_a_job_execution_exception_was_raised(
             self, retrieve_and_process_items_mock):
         retrieve_and_process_items_mock.side_effect = JobExecutionError
 
         source_instance = MagicMock()
         processor_instance = MagicMock()
+        processors = Processors()
+        processors.add(processor_instance)
 
-        job = Job(source_instance, [processor_instance])
+        job = Job(source_instance, processors)
         result = job.run()
 
         self.assertTrue(result.failed)
@@ -99,7 +111,10 @@ class JobTests(TestCase):
 
         processor_instance = MagicMock()
 
-        job = Job(source_instance, [processor_instance])
+        processors = Processors()
+        processors.add(processor_instance)
+
+        job = Job(source_instance, processors)
         result = job.run()
 
         self.assertTrue(result.failed)
