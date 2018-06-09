@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pmatigakis/hnac.svg?branch=develop)](https://travis-ci.org/pmatigakis/hnac)
+
 Introduction
 ============
 
