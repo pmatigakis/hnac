@@ -28,7 +28,6 @@ class UserCreationTests(ModelTestCase):
             self.assertIsNotNone(user.password)
             self.assertTrue(user.active)
             self.assertIsNotNone(user.registered_at)
-            self.assertIsNotNone(user.jti)
 
 
 class UserQueryTests(ModelTestCaseWithMockData):
@@ -69,7 +68,6 @@ class UserPasswordManagementTests(ModelTestCaseWithMockData):
         with self.app.app_context():
             user = User.get_by_username(db.session, self.test_user_username)
 
-            original_jti = user.jti
             original_password = user.password
 
             new_password = "new_{}".format(self.test_user_password)
@@ -85,7 +83,6 @@ class UserPasswordManagementTests(ModelTestCaseWithMockData):
             self.assertIsNotNone(user.password)
 
             self.assertNotEqual(user.password, original_password)
-            self.assertNotEqual(user.jti, original_jti)
 
 
 class UserAuthenticationTests(ModelTestCaseWithMockData):
@@ -109,39 +106,6 @@ class UserAuthenticationTests(ModelTestCaseWithMockData):
         with self.app.app_context():
             user = User.authenticate(db.session, "unknown-user",
                                      self.test_user_password)
-
-            self.assertIsNone(user)
-
-    def test_reset_user_token_jti(self):
-        with self.app.app_context():
-            user = User.get_by_username(db.session, self.test_user_username)
-
-            original_jti = user.jti
-
-            user.reset_token_identifier()
-
-            self.assertNotEqual(user.jti, original_jti)
-
-    def test_authenticate_using_jwt(self):
-        with self.app.app_context():
-            user = User.authenticate_using_jwt(db.session, self.test_user_id,
-                                               self.test_user_jti)
-
-            self.assertIsNotNone(user)
-            self.assertEqual(user.jti, self.test_user_jti)
-            self.assertEqual(user.id, self.test_user_id)
-
-    def test_fail_to_authenticate_using_jwt_with_invalid_user_id(self):
-        with self.app.app_context():
-            user = User.authenticate_using_jwt(db.session, 1234,
-                                               self.test_user_jti)
-
-            self.assertIsNone(user)
-
-    def test_fail_to_authenticate_using_jwt_with_invalid_jti(self):
-        with self.app.app_context():
-            user = User.authenticate_using_jwt(
-                db.session, self.test_user_id, "invalid-jti")
 
             self.assertIsNone(user)
 

@@ -7,9 +7,7 @@ setup(
     author = "Panagiotis Matigakis",
     author_email = "pmatigakis@gmail.com",
     version="0.3.0",
-
     packages=find_packages(),
-
     install_requires=[
         "python-firebase==1.2",
         "Flask==0.11.1",
@@ -19,30 +17,28 @@ setup(
         "Flask-WTF==0.12",
         "CouchDB==1.1",
         "Flask-RESTful==0.3.5",
-        "Flask-JWT==0.3.2",
         "alembic==0.8.8",
         "psycopg2==2.7.3.2",
         "Flask-Admin==1.4.2",
         "uWSGI==2.0.14",
         "pika==0.10.0",
         "arrow==0.12.1",
-        "Flask-SQLAlchemy==2.3.2"
+        "Flask-SQLAlchemy==2.3.2",
+        "flask-uauth==0.1.0"
     ],
-    
+    dependency_links=[
+        "https://github.com/pmatigakis/flask-uauth/archive/v0.1.0.tar.gz#egg=flask-uauth-0.1.0"
+    ],
     tests_require=[
         "nose==1.3.7",
         "httpretty==0.8.14"
     ],
-
     test_suite='nose.collector',
-
     entry_points={
         'console_scripts': [
             'hnac=hnac.cli.cli:main'
         ]
     },
-      
     zip_safe=False,
-
     include_package_data=True
 )

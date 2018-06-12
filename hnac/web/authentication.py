@@ -1,11 +1,11 @@
 from flask_login import LoginManager
-from werkzeug.security import check_password_hash
-from flask_jwt import _default_jwt_payload_handler
+from flask_uauth.uauth import UAuth
 
-from hnac.models import User
+from hnac.models import User, Token
 from hnac.web.database import db
 
 
+uauth = UAuth()
 login_manager = LoginManager()
 
 
@@ -14,25 +14,5 @@ def load_user(user_id):
     return db.session.query(User).get(user_id)
 
 
-def authenticate(username, password):
-    user = db.session.query(User).filter_by(username=username).one_or_none()
-
-    if user and check_password_hash(user.password, password):
-        return user
-
-    return None
-
-
-def identity(payload):
-    user_id = payload["identity"]
-    jti = payload["jti"]
-
-    return User.authenticate_using_jwt(db.session, user_id, jti)
-
-
-def payload_handler(identity):
-    payload = _default_jwt_payload_handler(identity)
-
-    payload["jti"] = identity.jti
-
-    return payload
+def authentication_callback(authorization_value):
+    return Token.get_by_value(db.session, authorization_value)

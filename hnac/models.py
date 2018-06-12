@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from flask_uauth.mixins import TokenMixin
 
 from hnac.web.database import db
 
@@ -18,7 +19,6 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(256), nullable=False)
     registered_at = db.Column(db.DateTime(timezone=False), nullable=False)
     active = db.Column(db.Boolean, nullable=False)
-    jti = db.Column(db.String(32), nullable=False)
 
     @classmethod
     def get_by_username(cls, session, username):
@@ -29,8 +29,7 @@ class User(db.Model, UserMixin):
         user = cls(username=username,
                    password=generate_password_hash(password),
                    active=active,
-                   registered_at=datetime.utcnow(),
-                   jti=uuid4().hex)
+                   registered_at=datetime.utcnow())
 
         session.add(user)
 
@@ -57,20 +56,55 @@ class User(db.Model, UserMixin):
 
         return user
 
-    @classmethod
-    def authenticate_using_jwt(cls, session, user_id, jti):
-        return session.query(User).filter_by(id=user_id, jti=jti).one_or_none()
-
     @property
     def is_active(self):
         return self.active
 
     def change_password(self, password):
-        self.reset_token_identifier()
         self.password = generate_password_hash(password)
 
-    def reset_token_identifier(self):
-        self.jti = uuid4().hex
+
+class Token(db.Model, TokenMixin):
+    __tablename__ = "tokens"
+
+    id = db.Column(
+        db.Integer, db.Sequence("tokens_id_seq"), nullable=False,
+        primary_key=True)
+    name = db.Column(db.String(40), nullable=False, unique=True)
+    value = db.Column(db.String(32), nullable=False)
+    active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime(timezone=False), nullable=False)
+
+    def is_active(self):
+        return self.active
+
+    @classmethod
+    def create(cls, session, name):
+        token = cls(
+            name=name,
+            value=uuid4().hex,
+            created_at=datetime.utcnow(),
+            active=True
+        )
+
+        session.add(token)
+
+        return token
+
+    @classmethod
+    def get_by_value(cls, session, value):
+        return session.query(cls).filter_by(value=value).one_or_none()
+
+    @classmethod
+    def get_by_name(cls, session, name):
+        return session.query(cls).filter_by(name=name).one_or_none()
+
+    @classmethod
+    def all(cls, session):
+        return session.query(cls).order_by(cls.name).all()
+
+    def delete(self, session):
+        session.delete(self)
 
 
 class Report(db.Model):

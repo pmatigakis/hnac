@@ -5,7 +5,7 @@ import json
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from hnac.models import User, Report
+from hnac.models import User, Report, Token
 from hnac.jobs import JobExecutionResult, Job
 from hnac.web.app import create_app
 from hnac.web.database import db
@@ -26,8 +26,11 @@ class ModelTestCaseWithMockData(ModelTestCase):
 
         self.test_user_username = "user1"
         self.test_user_password = "password"
+        self.test_token_name = "token_1"
 
         with self.app.app_context():
+            token = Token.create(db.session, self.test_token_name)
+
             user = User.create(db.session, self.test_user_username,
                                self.test_user_password)
             user.id = 1
@@ -62,12 +65,12 @@ class ModelTestCaseWithMockData(ModelTestCase):
 
             try:
                 db.session.commit()
-
-                self.test_user_id = user.id
-                self.test_user_jti = user.jti
             except SQLAlchemyError:
                 db.session.rollback()
                 self.fail("failed to load mock data")
+            self.test_user_id = user.id
+            self.test_token_id = token.id
+            self.test_token = token.value
 
 
 class WebTestCase(TestCase):
@@ -102,21 +105,27 @@ class WebTestCaseWithUserAccount(WebTestCase):
     def setUp(self):
         super(WebTestCaseWithUserAccount, self).setUp()
 
+        self.client = self.app.test_client()
+
         self.test_user_username = "user1"
         self.test_user_password = "password"
+        self.test_token_name = "token_1"
 
         with self.app.app_context():
+            token = Token.create(db.session, self.test_token_name)
+
             user1 = User.create(db.session, self.test_user_username,
                                 self.test_user_password)
 
             try:
                 db.session.commit()
-
-                self.test_user_id = user1.id
-                self.test_user_jti = user1.jti
             except SQLAlchemyError as e:
                 db.session.rollback()
                 self.fail("failed to load mock data")
+
+            self.test_user_id = user1.id
+            self.test_token_id = token.id
+            self.test_token = token.value
 
 
 class CommandTestCase(WebTestCase):

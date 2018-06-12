@@ -1,7 +1,7 @@
 import logging
 
 from flask_restful import Resource, marshal_with, abort
-from flask_jwt import jwt_required
+from flask_uauth.decorators import authentication_required
 
 from hnac.web.apis.arguments import story_list_query_parser
 from hnac.web.apis import models
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Stories(Resource):
     @marshal_with(models.story)
-    @jwt_required()
+    @authentication_required
     def get(self):
         args = story_list_query_parser.parse_args()
 
@@ -43,7 +43,7 @@ class Stories(Resource):
 
 class StoryDetails(Resource):
     @marshal_with(models.story)
-    @jwt_required()
+    @authentication_required
     def get(self, story_id):
         logger.info("retrieving story with id %s", story_id)
 

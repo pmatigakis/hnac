@@ -7,6 +7,9 @@ from hnac.web.app import create_app
 from hnac.cli.commands.users import (CreateAPIUser, ListAPIUsers,
                                      DeleteAPIUser, ChangeAPIUserPassword)
 from hnac.cli.commands.crawler import Crawl
+from hnac.cli.commands.tokens import (
+    CreateToken, DeleteToken, GetToken, ListTRokens
+)
 
 
 def main():
@@ -34,5 +37,12 @@ def main():
     manager.add_command("users", user_manager)
 
     manager.add_command("crawl", Crawl())
+
+    token_manager = Manager(usage="API token management")
+    token_manager.add_command("create", CreateToken())
+    token_manager.add_command("list", ListTRokens())
+    token_manager.add_command("get", GetToken())
+    token_manager.add_command("delete", DeleteToken())
+    manager.add_command("tokens", token_manager)
 
     manager.run()

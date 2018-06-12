@@ -3,9 +3,10 @@ from flask_admin import Admin
 
 from hnac.web.database import db
 from hnac.web.apis import api_v1
-from hnac.web import views, jwt
-from hnac.web.authentication import (login_manager, authenticate, identity,
-                                     payload_handler)
+from hnac.web import views
+from hnac.web.authentication import (
+    login_manager, uauth, authentication_callback
+)
 from hnac.models import User, Report
 from hnac.web.admin import (ReportModelView, UserModelView,
                             AuthenticatedIndexView)
@@ -34,11 +35,7 @@ def create_app(environment="production", settings_module=None):
     login_manager.init_app(app)
     login_manager.login_view = "frontend.login"
 
-    jwt.authentication_callback = authenticate
-    jwt.identity_callback = identity
-    jwt.jwt_payload_callback = payload_handler
-
-    jwt.init_app(app)
+    uauth.init_app(app, authentication_callback)
 
     admin = Admin(app, name="admin", template_mode='bootstrap3',
                   index_view=AuthenticatedIndexView())
