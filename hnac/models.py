@@ -71,7 +71,7 @@ class Token(db.Model, TokenMixin):
         db.Integer, db.Sequence("tokens_id_seq"), nullable=False,
         primary_key=True)
     name = db.Column(db.String(40), nullable=False, unique=True)
-    value = db.Column(db.String(32), nullable=False)
+    value = db.Column(db.String(32), nullable=False, unique=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime(timezone=False), nullable=False)
 
