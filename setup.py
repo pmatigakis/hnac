@@ -24,10 +24,7 @@ setup(
         "pika==0.10.0",
         "arrow==0.12.1",
         "Flask-SQLAlchemy==2.3.2",
-        "flask-uauth==0.1.0"
-    ],
-    dependency_links=[
-        "https://github.com/pmatigakis/flask-uauth/archive/v0.1.0.tar.gz#egg=flask-uauth-0.1.0"
+        "flask-uauth==0.1.1"
     ],
     tests_require=[
         "nose==1.3.7",
