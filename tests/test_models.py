@@ -3,11 +3,13 @@ from unittest import main
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from hnac.models import User, Report as Report
+from hnac.models import User, Report, Story
 from hnac.jobs import Job, JobExecutionResult
 from hnac.web.database import db
+from hnac.web.queries.operations import EQ, LTE, GTE
 
 from common import ModelTestCase, ModelTestCaseWithMockData
+from mock_data import load_stories_1
 
 
 class UserCreationTests(ModelTestCase):
@@ -153,6 +155,103 @@ class JobRetrievalTests(ModelTestCaseWithMockData):
 
             self.assertEqual(latest_reports[0].job_id, "job_2_uuid")
             self.assertEqual(latest_reports[1].job_id, "job_1_uuid")
+
+
+class StorySearchTests(ModelTestCase):
+    def setUp(self):
+        super(StorySearchTests, self).setUp()
+
+        with self.app.app_context():
+            load_stories_1(db.session)
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to load mock stories")
+
+    def test_search(self):
+        criteria = [
+            ("username", EQ, "user_1"),
+            ("score", LTE, 20),
+            ("score", GTE, 5)
+        ]
+
+        with self.app.app_context():
+            stories = Story.search(
+                session=db.session,
+                criteria=criteria,
+                offset=0,
+                limit=500,
+                order_by=Story.score,
+                sort_desc=False
+            )
+
+            self.assertEqual(len(stories), 3)
+            self.assertEqual(stories[0].id, 4)
+            self.assertEqual(stories[1].id, 2)
+            self.assertEqual(stories[2].id, 1)
+
+    def test_search_with_defaults(self):
+        criteria = [
+            ("username", EQ, "user_1"),
+            ("score", LTE, 20),
+            ("score", GTE, 5)
+        ]
+
+        with self.app.app_context():
+            stories = Story.search(
+                session=db.session,
+                criteria=criteria
+            )
+
+            self.assertEqual(len(stories), 3)
+            self.assertEqual(stories[0].id, 1)
+            self.assertEqual(stories[1].id, 2)
+            self.assertEqual(stories[2].id, 4)
+
+    def test_search_with_desc_sorting(self):
+        criteria = [
+            ("username", EQ, "user_1"),
+            ("score", LTE, 20),
+            ("score", GTE, 5)
+        ]
+
+        with self.app.app_context():
+            stories = Story.search(
+                session=db.session,
+                criteria=criteria,
+                offset=0,
+                limit=500,
+                order_by=Story.score,
+                sort_desc=True
+            )
+
+            self.assertEqual(len(stories), 3)
+            self.assertEqual(stories[2].id, 4)
+            self.assertEqual(stories[1].id, 2)
+            self.assertEqual(stories[0].id, 1)
+
+    def test_search_with_limit_and_offset(self):
+        criteria = [
+            ("username", EQ, "user_1"),
+            ("score", LTE, 20),
+            ("score", GTE, 5)
+        ]
+
+        with self.app.app_context():
+            stories = Story.search(
+                session=db.session,
+                criteria=criteria,
+                offset=1,
+                limit=2,
+                order_by=Story.score,
+                sort_desc=True
+            )
+
+            self.assertEqual(len(stories), 2)
+            self.assertEqual(stories[1].id, 4)
+            self.assertEqual(stories[0].id, 2)
 
 
 if __name__ == '__main__':

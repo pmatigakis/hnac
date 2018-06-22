@@ -7,3 +7,7 @@ story_list_query_parser.add_argument(
     "order_by", default="id", choices=("id", "time", "score"))
 story_list_query_parser.add_argument(
     "desc", type=inputs.boolean, default=False)
+
+
+story_search_query_parser = story_list_query_parser.copy()
+story_search_query_parser.add_argument("q", type=str, required=True)

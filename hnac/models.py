@@ -7,6 +7,8 @@ from flask_login import UserMixin
 from flask_uauth.mixins import TokenMixin
 
 from hnac.web.database import db
+from hnac.web.queries import operations
+from hnac.exceptions import UnsupportedSearchOperation
 
 
 class User(db.Model, UserMixin):
@@ -283,6 +285,46 @@ class Story(db.Model):
                       .offset(offset) \
                       .limit(limit) \
                       .all()
+
+    @classmethod
+    def search(cls, session, criteria, offset=0, limit=500, order_by=None,
+               sort_desc=False):
+        supported_operations = [
+            operations.EQ, operations.LT, operations.LTE, operations.GT,
+            operations.GTE
+        ]
+
+        argument_mapping = {
+            "username": HackernewsUser.username,
+            "url": Url.url,
+            "score": Story.score,
+            "story_id": Story.story_id,
+            "time": Story.time
+        }
+
+        query_object = session.query(Story)
+        query_object = query_object.join(HackernewsUser)
+        query_object = query_object.join(Url)
+
+        for variable, operation, value in criteria:
+            if (operation not in supported_operations or
+                    variable not in argument_mapping):
+                raise UnsupportedSearchOperation(variable, operation)
+
+            field = argument_mapping.get(variable) or getattr(Story, variable)
+
+            query_object = query_object.filter(
+                operations.OPERATIONS[operation](field, value))
+
+        order_by = order_by or Story.id
+        if sort_desc:
+            order_by = db.desc(order_by)
+
+        query_object = query_object.order_by(order_by)
+        query_object = query_object.limit(limit)
+        query_object = query_object.offset(offset)
+
+        return query_object.all()
 
     def as_dict(self):
         return {

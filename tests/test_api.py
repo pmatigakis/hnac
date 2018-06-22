@@ -7,6 +7,7 @@ from hnac.models import Story, Url, HackernewsUser
 from hnac.web.database import db
 
 from common import WebTestCaseWithUserAccount
+from mock_data import load_stories_1
 
 
 class StoryEndpointTest(WebTestCaseWithUserAccount):
@@ -106,13 +107,14 @@ class StoryEndpointTest(WebTestCaseWithUserAccount):
 
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode("utf-8"))
+        self.assertIn("message", data)
+        message = data["message"]
+        self.assertIsInstance(message, str)
         self.assertDictEqual(
             data,
             {
                 "error": "story doesn't exist",
-                "message": "You have requested this URI [/api/v1/story/00000] "
-                           "but did you mean /api/v1/story/<int:story_id> or "
-                           "/api/v1/stories ?",
+                "message": message,
                 "story_id": 0
             }
         )
@@ -505,6 +507,267 @@ class StoriesEndpointTest(WebTestCaseWithUserAccount):
                 'time': 1528828750,
                 'title': 'test story 3',
                 'url': 'http://www.example.com'
+            }
+        )
+
+
+class StorySearchEndpointTest(WebTestCaseWithUserAccount):
+    def setUp(self):
+        super(StorySearchEndpointTest, self).setUp()
+
+        with self.app.app_context():
+            load_stories_1(db.session)
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to create mock data")
+
+    def test_search_requires_authentication(self):
+        response = self.client.get(
+            "/api/v1/stories/search",
+            query_string={
+                "q": "username=user_1+score__gte=5+score__lte=20",
+                "offset": 0,
+                "limit": 500,
+                "order_by": "score",
+                "desc": "false"
+            }
+        )
+
+        self.assertEqual(response.status_code, 401)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertDictEqual(
+            data,
+            {
+                'message': 'The server could not verify that you are '
+                           'authorized to access the '
+                           'URL requested.  You either supplied the wrong '
+                           'credentials (e.g. a '
+                           "bad password), or your browser doesn't understand "
+                           "how to supply "
+                           'the credentials required.'
+            }
+        )
+
+    def test_search(self):
+        response = self.client.get(
+            "/api/v1/stories/search",
+            query_string={
+                "q": "username=user_1+score__gte=5+score__lte=20",
+                "offset": 0,
+                "limit": 500,
+                "order_by": "score",
+                "desc": "false"
+            },
+            headers={
+                "Authorization": self.test_token
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 3)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'by': 'user_1',
+                    'descendants': 3,
+                    'id': 4,
+                    'score': 7,
+                    'time': 1529613970,
+                    'title': 'story 4',
+                    'url': 'http://www.example.com/page_4'
+                },
+                {
+                    'by': 'user_1',
+                    'descendants': 1,
+                    'id': 2,
+                    'score': 10,
+                    'time': 1529613980,
+                    'title': 'story 2',
+                    'url': 'http://www.example.com/page_2'
+                },
+                {
+                    'by': 'user_1',
+                    'descendants': 0,
+                    'id': 1,
+                    'score': 15,
+                    'time': 1529613984,
+                    'title': 'story 1',
+                    'url': 'http://www.example.com/page_1'
+                }
+            ]
+        )
+
+    def test_search_with_defaults(self):
+        response = self.client.get(
+            "/api/v1/stories/search",
+            query_string={
+                "q": "username=user_1+score__gte=5+score__lte=20"
+            },
+            headers={
+                "Authorization": self.test_token
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 3)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'by': 'user_1',
+                    'descendants': 0,
+                    'id': 1,
+                    'score': 15,
+                    'time': 1529613984,
+                    'title': 'story 1',
+                    'url': 'http://www.example.com/page_1'
+                },
+                {
+                    'by': 'user_1',
+                    'descendants': 1,
+                    'id': 2,
+                    'score': 10,
+                    'time': 1529613980,
+                    'title': 'story 2',
+                    'url': 'http://www.example.com/page_2'
+                },
+                {
+                    'by': 'user_1',
+                    'descendants': 3,
+                    'id': 4,
+                    'score': 7,
+                    'time': 1529613970,
+                    'title': 'story 4',
+                    'url': 'http://www.example.com/page_4'
+                }
+            ]
+        )
+
+    def test_search_with_desc_sorting(self):
+        response = self.client.get(
+            "/api/v1/stories/search",
+            query_string={
+                "q": "username=user_1+score__gte=5+score__lte=20",
+                "offset": 0,
+                "limit": 500,
+                "order_by": "score",
+                "desc": "true"
+            },
+            headers={
+                "Authorization": self.test_token
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 3)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'by': 'user_1',
+                    'descendants': 0,
+                    'id': 1,
+                    'score': 15,
+                    'time': 1529613984,
+                    'title': 'story 1',
+                    'url': 'http://www.example.com/page_1'
+                },
+                {
+                    'by': 'user_1',
+                    'descendants': 1,
+                    'id': 2,
+                    'score': 10,
+                    'time': 1529613980,
+                    'title': 'story 2',
+                    'url': 'http://www.example.com/page_2'
+                },
+                {
+                    'by': 'user_1',
+                    'descendants': 3,
+                    'id': 4,
+                    'score': 7,
+                    'time': 1529613970,
+                    'title': 'story 4',
+                    'url': 'http://www.example.com/page_4'
+                }
+            ]
+        )
+
+    def test_search_with_limit_and_offset(self):
+        response = self.client.get(
+            "/api/v1/stories/search",
+            query_string={
+                "q": "username=user_1+score__gte=5+score__lte=20",
+                "offset": 1,
+                "limit": 2,
+                "order_by": "score",
+                "desc": "false"
+            },
+            headers={
+                "Authorization": self.test_token
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 2)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'by': 'user_1',
+                    'descendants': 1,
+                    'id': 2,
+                    'score': 10,
+                    'time': 1529613980,
+                    'title': 'story 2',
+                    'url': 'http://www.example.com/page_2'
+                },
+                {
+                    'by': 'user_1',
+                    'descendants': 0,
+                    'id': 1,
+                    'score': 15,
+                    'time': 1529613984,
+                    'title': 'story 1',
+                    'url': 'http://www.example.com/page_1'
+                }
+            ]
+        )
+
+    def test_invalid_search_argument(self):
+        response = self.client.get(
+            "/api/v1/stories/search",
+            query_string={
+                "q": "username=user_1+score__invalid=5+score__lte=20",
+                "offset": 0,
+                "limit": 500,
+                "order_by": "score",
+                "desc": "false"
+            },
+            headers={
+                "Authorization": self.test_token
+            }
+        )
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertDictEqual(
+            data,
+            {
+                "error": "failed to parse query item",
+                "operation": "score__invalid=5"
             }
         )
 

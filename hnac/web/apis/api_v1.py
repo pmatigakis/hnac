@@ -9,3 +9,4 @@ api = Api(blueprint)
 
 api.add_resource(stories.Stories, "/stories")
 api.add_resource(stories.StoryDetails, "/story/<int:story_id>")
+api.add_resource(stories.StorySearch, "/stories/search")
