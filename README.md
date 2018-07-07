@@ -25,7 +25,7 @@ Create the configuration file *settings.py* and set the variables for the Postgr
 database.
 
 ```python
-DB = "postgresql+psycopg2://username:password@localhost:5432/hnac"
+SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://username:password@localhost:5432/hnac"
 ```
 
 Edit the alembic.ini file and set the *sqlalchemy.url* variable to point to your
