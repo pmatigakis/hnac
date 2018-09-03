@@ -772,5 +772,97 @@ class StorySearchEndpointTest(WebTestCaseWithUserAccount):
         )
 
 
+class UrlStoriesEndpointTests(WebTestCaseWithUserAccount):
+    def setUp(self):
+        super(UrlStoriesEndpointTests, self).setUp()
+
+        with self.app.app_context():
+            load_stories_1(db.session)
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to create mock data")
+
+    def test_url_stories_endpoint_requires_authentication(self):
+        response = self.client.get(
+            "/api/v1/url/stories",
+            query_string={
+                "url": "http://www.example.com/page_1"
+            }
+        )
+
+        self.assertEqual(response.status_code, 401)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertDictEqual(
+            data,
+            {
+                'message': 'The server could not verify that you are '
+                           'authorized to access the '
+                           'URL requested.  You either supplied the wrong '
+                           'credentials (e.g. a '
+                           "bad password), or your browser doesn't understand "
+                           "how to supply "
+                           'the credentials required.'
+            }
+        )
+
+    def test_get_url_stories(self):
+        response = self.client.get(
+            "/api/v1/url/stories",
+            query_string={
+                "url": "http://www.example.com/page_1"
+            },
+            headers={
+                "Authorization": self.test_token
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'by': 'user_1',
+                    'descendants': 0,
+                    'id': 1,
+                    'score': 15,
+                    'time': 1529613984,
+                    'title': 'story 1',
+                    'url': 'http://www.example.com/page_1'
+                }
+            ]
+        )
+
+    def test_fail_to_retrieve_stories_of_unknown_url(self):
+        response = self.client.get(
+            "/api/v1/url/stories",
+            query_string={
+                "url": "http://www.example.com/unknown_url"
+            },
+            headers={
+                "Authorization": self.test_token
+            }
+        )
+
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode("utf-8"))
+        self.assertDictEqual(
+            data,
+            {
+                'error': "url doesn't exist",
+                'message': 'You have requested this URI '
+                           '[/api/v1/url/stories] but did you '
+                           'mean /api/v1/url/stories or /api/v1/stories or '
+                           '/api/v1/stories/search ?',
+                'url': 'http://www.example.com/unknown_url'
+            }
+        )
+
+
 if __name__ == "__main__":
     main()
