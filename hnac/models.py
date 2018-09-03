@@ -181,6 +181,8 @@ class Url(db.Model):
     url = db.Column(db.String(2048), nullable=False, unique=True)
     created_at = db.Column(db.DateTime(timezone=False))
 
+    stories = db.relationship("Story", back_populates="url")
+
     @classmethod
     def create(cls, session, url):
         url_object = cls(

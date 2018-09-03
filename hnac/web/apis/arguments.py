@@ -11,3 +11,7 @@ story_list_query_parser.add_argument(
 
 story_search_query_parser = story_list_query_parser.copy()
 story_search_query_parser.add_argument("q", type=str, required=True)
+
+
+url_stories_query_parser = reqparse.RequestParser()
+url_stories_query_parser.add_argument("url", type=str, required=True)
