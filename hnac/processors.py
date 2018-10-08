@@ -278,7 +278,10 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
             username=config.get("RABBITMQ_STORY_PROCESSOR_USERNAME"),
             password=config.get("RABBITMQ_STORY_PROCESSOR_PASSWORD"),
             exchange=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE"],
-            routing_key=config["RABBITMQ_STORY_PROCESSOR_ROUTING_KEY"]
+            routing_key=config["RABBITMQ_STORY_PROCESSOR_ROUTING_KEY"],
+            exchange_type=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_TYPE"],
+            durable=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_DURABLE"],
+            auto_delete=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_AUTO_DELETE"]
         )
 
     def _create_message(self, item):
@@ -314,7 +317,10 @@ class RabbitMQURLProcessor(RabbitMQProcessorBase):
             username=config.get("RABBITMQ_URL_PROCESSOR_USERNAME"),
             password=config.get("RABBITMQ_URL_PROCESSOR_PASSWORD"),
             exchange=config["RABBITMQ_URL_PROCESSOR_EXCHANGE"],
-            routing_key=config["RABBITMQ_URL_PROCESSOR_ROUTING_KEY"]
+            routing_key=config["RABBITMQ_URL_PROCESSOR_ROUTING_KEY"],
+            exchange_type=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_TYPE"],
+            durable=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_DURABLE"],
+            auto_delete=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_AUTO_DELETE"]
         )
 
     def _create_message(self, item):

@@ -9,7 +9,8 @@ from hnac.channels import MessageChannel
 logger = logging.getLogger(__name__)
 
 
-def create_publisher(host, port, username, password, exchange, routing_key):
+def create_publisher(host, port, username, password, exchange, exchange_type,
+                     durable, auto_delete, routing_key):
     credentials = None
     if username and password:
         credentials = PlainCredentials(username, password)
@@ -19,12 +20,16 @@ def create_publisher(host, port, username, password, exchange, routing_key):
         port=port,
         credentials=credentials,
         exchange=exchange,
-        routing_key=routing_key
+        routing_key=routing_key,
+        exchange_type=exchange_type,
+        durable=durable,
+        auto_delete=auto_delete
     )
 
 
 class RabbitMQPublisher(object):
-    def __init__(self, host, port, credentials, exchange, routing_key):
+    def __init__(self, host, port, credentials, exchange, exchange_type,
+                 durable, auto_delete, routing_key):
         """Create a new RabbitMQPublisher object
 
         :param str host: the RabbitMQ host
@@ -32,10 +37,16 @@ class RabbitMQPublisher(object):
         :param PlainCredentials credentials: the credentials to use in order to
         connect to RabbitMQ
         :param str exchange: the exchange to publish the stories
+        :param str exchange_type: the exchange type
+        :param boolean durable: is the exchange durable
+        :param boolean auto_delete: will the exchange be auto deleted
         :param str routing_key: the routing key to use
         """
         self._exchange = exchange
         self._routing_key = routing_key
+        self._exchange_type = exchange_type
+        self._durable = durable
+        self._auto_delete = auto_delete
 
         self._connection_parameters = pika.ConnectionParameters(
             host=host,
@@ -52,7 +63,9 @@ class RabbitMQPublisher(object):
 
         channel.exchange_declare(
             exchange=self._exchange,
-            exchange_type="topic"
+            exchange_type=self._exchange_type,
+            durable=self._durable,
+            auto_delete=self._auto_delete
         )
 
         self._channel = MessageChannel(
