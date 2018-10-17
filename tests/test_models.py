@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from unittest import main
 
 from sqlalchemy.exc import SQLAlchemyError
+from dateutil.tz import tzutc
 
 from hnac.models import User, Report, Story
 from hnac.jobs import Job, JobExecutionResult
@@ -252,6 +253,36 @@ class StorySearchTests(ModelTestCase):
             self.assertEqual(len(stories), 2)
             self.assertEqual(stories[1].id, 4)
             self.assertEqual(stories[0].id, 2)
+
+
+class StoryRetrievalTests(ModelTestCase):
+    def setUp(self):
+        super(StoryRetrievalTests, self).setUp()
+
+        with self.app.app_context():
+            load_stories_1(db.session)
+
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                self.fail("failed to load mock stories")
+
+    def test_yield_in_period(self):
+        from_date = datetime(2018, 6, 21, 20, 46, 0, tzinfo=tzutc())
+        to_date = datetime(2018, 6, 21, 20, 46, 30, tzinfo=tzutc())
+
+        with self.app.app_context():
+            story_ids = [
+                story.story_id
+                for story in Story.yield_in_period(
+                    db.session, from_date, to_date)
+            ]
+
+            self.assertEqual(
+                story_ids,
+                [4, 2, 1]
+            )
 
 
 if __name__ == '__main__':

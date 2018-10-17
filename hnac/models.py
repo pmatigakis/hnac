@@ -328,6 +328,13 @@ class Story(db.Model):
 
         return query_object.all()
 
+    @classmethod
+    def yield_in_period(cls, session, from_date, to_date, items_per_batch=300):
+        return session.query(cls).filter(
+            cls.time >= from_date.timestamp(),
+            cls.time < to_date.timestamp()
+        ).order_by(cls.time).yield_per(items_per_batch)
+
     def as_dict(self):
         return {
             "id": self.story_id,

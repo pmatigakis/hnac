@@ -10,6 +10,7 @@ from hnac.cli.commands.crawler import Crawl
 from hnac.cli.commands.tokens import (
     CreateToken, DeleteToken, GetToken, ListTRokens
 )
+from hnac.cli.commands.stories import DumpStories
 
 
 def main():
@@ -44,5 +45,9 @@ def main():
     token_manager.add_command("get", GetToken())
     token_manager.add_command("delete", DeleteToken())
     manager.add_command("tokens", token_manager)
+
+    stories_manager = Manager(usage="Story management commands")
+    stories_manager.add_command("dump", DumpStories())
+    manager.add_command("stories", stories_manager)
 
     manager.run()
