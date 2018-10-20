@@ -6,7 +6,7 @@ setup(
     description = "Crawler for the Hackewnews API",
     author = "Panagiotis Matigakis",
     author_email = "pmatigakis@gmail.com",
-    version="0.5.0",
+    version="0.6.0-dev",
     packages=find_packages(),
     install_requires=[
         "python-firebase==1.2",
