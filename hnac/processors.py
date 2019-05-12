@@ -1,10 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import logging
-from time import time
 from datetime import datetime
 
-import couchdb
-from couchdb.http import HTTPError
 from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.schemas import HackernewsStorySchema
@@ -53,79 +50,6 @@ class Processor(object):
         :param Job job: the job
         """
         pass
-
-
-class CouchDBStorage(Processor):
-    """Save the hackernews stories to a CouchDb database"""
-
-    def __init__(self):
-        super(CouchDBStorage, self).__init__()
-
-        self._db = None
-
-    def _init_database(self, host, database_name):
-        server = couchdb.Server(host)
-        self._db = server[database_name]
-
-    def configure(self, config):
-        connection_string = config["COUCHDB_SERVER"]
-        database_name = config["COUCHDB_DATABASE"]
-
-        logger.info("Using CouchDB server at %s", connection_string)
-        logger.info("Using CouchDB database %s", database_name)
-
-        self._init_database(connection_string, database_name)
-
-    def _get_document(self, doc_id):
-        try:
-            return self._db.get(doc_id)
-        except HTTPError:
-            msg = "failed to retrieve story document with id %s from couchdb"
-            logger.exception(msg, doc_id)
-
-            raise ItemProcessingError("failed to retrieve story document")
-
-    def _save_document(self, story_id, doc_id, doc):
-        try:
-            self._db[doc_id] = doc
-        except HTTPError:
-            msg = "Failed to save story with id to CouchDB %d"
-            logger.exception(msg, story_id)
-
-            raise ItemProcessingError("failed to save story document")
-
-    def process_item(self, source, item):
-        if not isinstance(item, HackernewsStoryItem):
-            logger.warning("item is not a story object")
-            return
-
-        story_id = item.id
-        doc_id = "hackernews/item/%d" % story_id
-
-        doc = self._get_document(doc_id)
-
-        current_time = time()
-        if doc is None:
-            # the document doesn't exist so we have to create it
-            doc = {
-                "created_at": current_time
-            }
-
-        doc["updated_at"] = current_time
-
-        schema = HackernewsStorySchema()
-        serialization_result = schema.dump(item)
-        if serialization_result.errors:
-            logger.warning(
-                "failed to serialize story item: errors(%s)",
-                serialization_result.errors
-            )
-
-        doc["data"] = serialization_result.data
-
-        logger.info("saving story with id %s to couchdb", story_id)
-
-        self._save_document(story_id, doc_id, doc)
 
 
 class DummyProcessor(Processor):

@@ -15,7 +15,6 @@ setup(
         "Flask-Script==2.0.5",
         "Flask-Login==0.3.2",
         "Flask-WTF==0.12",
-        "CouchDB==1.1",
         "Flask-RESTful==0.3.5",
         "alembic==0.8.8",
         "psycopg2==2.7.3.2",
