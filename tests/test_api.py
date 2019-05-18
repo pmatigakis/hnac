@@ -46,7 +46,7 @@ class StoryEndpointTest(WebTestCaseWithUserAccount):
             data,
             {
                 'message': 'The server could not verify that you are '
-                           'authorized to access the URL requested.  You '
+                           'authorized to access the URL requested. You '
                            'either supplied the wrong credentials (e.g. a '
                            "bad password), or your browser doesn't understand "
                            "how to supply the credentials required."
@@ -67,7 +67,7 @@ class StoryEndpointTest(WebTestCaseWithUserAccount):
             data,
             {
                 'message': 'The server could not verify that you are '
-                           'authorized to access the URL requested.  You '
+                           'authorized to access the URL requested. You '
                            'either supplied the wrong credentials (e.g. a '
                            "bad password), or your browser doesn't understand "
                            "how to supply the credentials required."
@@ -180,7 +180,7 @@ class StoriesEndpointTest(WebTestCaseWithUserAccount):
             data,
             {
                 'message': 'The server could not verify that you are '
-                           'authorized to access the URL requested.  You '
+                           'authorized to access the URL requested. You '
                            'either supplied the wrong credentials (e.g. a '
                            "bad password), or your browser doesn't understand "
                            "how to supply the credentials required."
@@ -201,7 +201,7 @@ class StoriesEndpointTest(WebTestCaseWithUserAccount):
             data,
             {
                 'message': 'The server could not verify that you are '
-                           'authorized to access the URL requested.  You '
+                           'authorized to access the URL requested. You '
                            'either supplied the wrong credentials (e.g. a '
                            "bad password), or your browser doesn't understand "
                            "how to supply the credentials required."
@@ -543,7 +543,7 @@ class StorySearchEndpointTest(WebTestCaseWithUserAccount):
             {
                 'message': 'The server could not verify that you are '
                            'authorized to access the '
-                           'URL requested.  You either supplied the wrong '
+                           'URL requested. You either supplied the wrong '
                            'credentials (e.g. a '
                            "bad password), or your browser doesn't understand "
                            "how to supply "
@@ -800,7 +800,7 @@ class UrlStoriesEndpointTests(WebTestCaseWithUserAccount):
             {
                 'message': 'The server could not verify that you are '
                            'authorized to access the '
-                           'URL requested.  You either supplied the wrong '
+                           'URL requested. You either supplied the wrong '
                            'credentials (e.g. a '
                            "bad password), or your browser doesn't understand "
                            "how to supply "
