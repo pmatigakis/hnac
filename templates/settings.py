@@ -2,10 +2,6 @@ DEBUG = False
 
 DB = "postgresql+psycopg2://username:password@localhost:5432/hnac"
 
-# settings for the CouchDb processor
-# COUCHDB_SERVER = "http://localhost:5984"
-# COUCHDB_DATABASE = "hnac"
-
 # settings for the RabbitMQ story processor
 # RABBITMQ_STORY_PROCESSOR_HOST = "localhost"
 # RABBITMQ_STORY_PROCESSOR_EXCHANGE = "hackernews"
@@ -22,9 +18,6 @@ DB = "postgresql+psycopg2://username:password@localhost:5432/hnac"
 
 
 PROCESSORS = [
-    # uncomment the following line in order to enable the CouchDB storage
-    # "hnac.processors.CouchDBStorage",
-
     # uncomment the following line to enable the RabbitMQ story processor
     # "hnac.processors.RabbitMQStoryProcessor",
 
