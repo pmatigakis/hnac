@@ -20,3 +20,8 @@ ul.tag_list li{
     list-style-type: none;
     display: inline;
 }
+
+.story-title {
+  font-size: 1.2em;
+  font-weight: bold;
+}

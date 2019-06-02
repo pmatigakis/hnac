@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 
 from flask import Blueprint, render_template, redirect, url_for
@@ -23,7 +24,7 @@ def index():
         story = {
             "by": story.hackernews_user.username,
             "id": story.story_id,
-            "time": story.time,
+            "time": datetime.fromtimestamp(story.time),
             "title": story.title,
             "url": story.url.url,
             "score": story.score,
