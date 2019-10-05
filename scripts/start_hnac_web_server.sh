@@ -1,0 +1,12 @@
+uwsgi --http :8031 \
+--vhost \
+--vacuum \
+--venv=/path/to/virtualenv \
+--chdir=/path/to/settings/file \
+--module=hnac.web.wsgi \
+--callable=app \
+--master \
+--processes=4 \
+--die-on-term \
+--lazy-apps \
+--enable-threads
