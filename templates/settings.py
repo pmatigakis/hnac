@@ -1,6 +1,6 @@
 DEBUG = False
 
-DB = "postgresql+psycopg2://username:password@localhost:5432/hnac"
+SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://$username:$password@localhost:5432/$db"
 
 # settings for the RabbitMQ story processor
 # RABBITMQ_STORY_PROCESSOR_HOST = "localhost"
