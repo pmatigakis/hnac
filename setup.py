@@ -27,7 +27,8 @@ setup(
         "python-dateutil==2.7.3",
         "MarkupSafe==1.1.1",
         "itsdangerous==1.1.0",
-        "Jinja2==2.10.3"
+        "Jinja2==2.10.3",
+        "Werkzeug==0.16.0"
     ],
     tests_require=[
         "nose==1.3.7",
