@@ -10,7 +10,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "python-firebase==1.2",
-        "Flask==0.11.1",
+        "Flask==1.0",
         "marshmallow==2.10.1",
         "Flask-Script==2.0.5",
         "Flask-Login==0.3.2",
