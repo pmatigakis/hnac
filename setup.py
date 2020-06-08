@@ -26,7 +26,8 @@ setup(
         "flask-uauth==0.1.1",
         "python-dateutil==2.7.3",
         "MarkupSafe==1.1.1",
-        "itsdangerous==1.1.0"
+        "itsdangerous==1.1.0",
+        "Jinja2==2.10.3"
     ],
     tests_require=[
         "nose==1.3.7",
