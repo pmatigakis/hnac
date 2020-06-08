@@ -24,7 +24,9 @@ setup(
         "arrow==0.12.1",
         "Flask-SQLAlchemy==2.3.2",
         "flask-uauth==0.1.1",
-        "python-dateutil==2.7.3"
+        "python-dateutil==2.7.3",
+        "MarkupSafe==1.1.1",
+        "itsdangerous==1.1.0"
     ],
     tests_require=[
         "nose==1.3.7",
