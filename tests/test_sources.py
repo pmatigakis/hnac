@@ -36,8 +36,10 @@ class HackernewsStoriesItemRetrieval(TestCase):
 
         self.assertEqual(len(stories), 2)
 
-        self.assertEqual(stories[0], HackernewsStoryItem(**story_1_data))
-        self.assertEqual(stories[1], HackernewsStoryItem(**story_2_data))
+        self.assertEqual(stories[0], HackernewsStoryItem(
+            raw_data=story_1_data, **story_1_data))
+        self.assertEqual(stories[1], HackernewsStoryItem(
+            raw_data=story_2_data, **story_2_data))
 
     @patch("hnac.sources.sleep")
     @patch("hnac.sources.HackernewsStories._execute_new_stories_request")

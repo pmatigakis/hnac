@@ -23,6 +23,6 @@ class HackernewsStorySchema(Schema):
     score = fields.Int(required=True)
     time = fields.Int(required=True)
 
-    @post_load
-    def make_hackernews_story_item(self, data):
-        return HackernewsStoryItem(**data)
+    @post_load(pass_original=True)
+    def make_hackernews_story_item(self, data, original_data):
+        return HackernewsStoryItem(raw_data=original_data, **data)

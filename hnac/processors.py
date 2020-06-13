@@ -5,7 +5,9 @@ from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 
 from hnac.schemas import HackernewsStorySchema
-from hnac.models import HackernewsUser, Url, Story, HackernewsStoryItem
+from hnac.models import (
+    HackernewsUser, Url, Story, HackernewsStoryItem, StoryData
+)
 from hnac.queues import create_publisher
 from hnac.exceptions import ItemProcessingError
 from hnac.messages import StoryDocumentMessage, UrlDocumentMessage
@@ -91,6 +93,12 @@ class SQLAlchemyStorage(Processor):
             descendants=story_data.descendants
         )
 
+        StoryData.create(
+            session=self._session,
+            data=story_data.raw_data,
+            story=story
+        )
+
         return story
 
     def _update_story(self, story, story_data):
@@ -99,6 +107,12 @@ class SQLAlchemyStorage(Processor):
         story.score = story_data.score
         story.descendants = story_data.descendants
         story.updated_at = datetime.utcnow()
+
+        StoryData.create(
+            session=self._session,
+            data=story_data.raw_data,
+            story=story
+        )
 
     def process_item(self, source, item):
         if not isinstance(item, HackernewsStoryItem):

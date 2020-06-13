@@ -370,12 +370,13 @@ class StoryData(db.Model):
             data=data
         )
 
-        session.ad(story_data)
+        session.add(story_data)
 
         return story_data
 
 
 HackernewsStoryItem = namedtuple(
     "HackernewsStoryItem",
-    ["id", "type", "by", "descendants", "score", "time", "title", "url"]
+    ["id", "type", "by", "descendants", "score", "time", "title", "url",
+     "raw_data"]
 )
