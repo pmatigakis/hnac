@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/pmatigakis/hnac.svg?branch=develop)](https://travis-ci.org/pmatigakis/hnac)
-[![codecov](https://codecov.io/gh/pmatigakis/hnac/branch/develop/graph/badge.svg)](https://codecov.io/gh/pmatigakis/hnac)
 
 Introduction
 ============
