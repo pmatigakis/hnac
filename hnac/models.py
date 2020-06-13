@@ -240,6 +240,7 @@ class Story(db.Model):
 
     hackernews_user = db.relationship("HackernewsUser")
     url = db.relationship("Url")
+    story_data = db.relationship("StoryData")
 
     @classmethod
     def create(cls, session, user, url, story_id, title, score, time,
@@ -345,6 +346,33 @@ class Story(db.Model):
             "score": self.score,
             "descendants": self.descendants
         }
+
+
+class StoryData(db.Model):
+    __tablename__ = "stories_data"
+
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
+    hackernews_id = db.Column(db.Integer, nullable=False, index=True)
+    story_id = db.Column(db.Integer, db.ForeignKey("stories.id"),
+                         nullable=False)
+    downloaded_at = db.Column(db.DateTime(timezone=False),
+                              nullable=False, index=True)
+    data = db.Column(db.JSON, nullable=False)
+
+    story = db.relationship("Story", back_populates="story_data")
+
+    @classmethod
+    def create(cls, session, data, story):
+        story_data =  cls(
+            hackernews_id=data["id"],
+            story=story,
+            downloaded_at=datetime.utcnow(),
+            data=data
+        )
+
+        session.ad(story_data)
+
+        return story_data
 
 
 HackernewsStoryItem = namedtuple(
