@@ -1,2 +1,3 @@
 recursive-include hnac/web/static *
 recursive-include hnac/web/templates *
+include README.md LICENSE requirements.txt requirements-test.txt
