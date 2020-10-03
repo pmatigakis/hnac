@@ -119,7 +119,7 @@ class WebTestCaseWithUserAccount(WebTestCase):
 
             try:
                 db.session.commit()
-            except SQLAlchemyError as e:
+            except SQLAlchemyError:
                 db.session.rollback()
                 self.fail("failed to load mock data")
 

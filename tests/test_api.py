@@ -107,14 +107,10 @@ class StoryEndpointTest(WebTestCaseWithUserAccount):
 
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data.decode("utf-8"))
-        self.assertIn("message", data)
-        message = data["message"]
-        self.assertIsInstance(message, str)
         self.assertDictEqual(
             data,
             {
                 "error": "story doesn't exist",
-                "message": message,
                 "story_id": 0
             }
         )
@@ -855,10 +851,6 @@ class UrlStoriesEndpointTests(WebTestCaseWithUserAccount):
             data,
             {
                 'error': "url doesn't exist",
-                'message': 'You have requested this URI '
-                           '[/api/v1/url/stories] but did you '
-                           'mean /api/v1/url/stories or /api/v1/stories or '
-                           '/api/v1/stories/search ?',
                 'url': 'http://www.example.com/unknown_url'
             }
         )

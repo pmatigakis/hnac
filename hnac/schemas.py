@@ -24,5 +24,5 @@ class HackernewsStorySchema(Schema):
     time = fields.Int(required=True)
 
     @post_load(pass_original=True)
-    def make_hackernews_story_item(self, data, original_data):
+    def make_hackernews_story_item(self, data, original_data, **kwargs):
         return HackernewsStoryItem(raw_data=original_data, **data)

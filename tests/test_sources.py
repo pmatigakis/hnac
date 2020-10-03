@@ -1,7 +1,8 @@
 from unittest import TestCase, main
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch
 
 from requests import RequestException
+import responses
 
 from hnac.sources import HackernewsStories, SourceError
 from hnac.models import HackernewsStoryItem
@@ -24,11 +25,30 @@ def firebase_get(url, *args, **kwargs):
 
 
 class HackernewsStoriesItemRetrieval(TestCase):
-    @patch("hnac.sources.create_hackernews_firebase_app")
-    def test_get_next_item(self, create_hackernews_firebase_app):
-        instance = MagicMock()
-        create_hackernews_firebase_app.return_value = instance
-        instance.get.side_effect = firebase_get
+    @responses.activate
+    def test_get_next_item(self):
+        responses.add(
+            responses.GET,
+            'https://hacker-news.firebaseio.com/v0/newstories.json',
+            json=[story_1_data["id"], story_2_data["id"]],
+            status=200
+        )
+
+        responses.add(
+            responses.GET,
+            f'https://hacker-news.firebaseio.com'
+            f'/v0/item/{story_1_data["id"]}.json',
+            json=story_1_data,
+            status=200
+        )
+
+        responses.add(
+            responses.GET,
+            f'https://hacker-news.firebaseio.com'
+            f'/v0/item/{story_2_data["id"]}.json',
+            json=story_2_data,
+            status=200
+        )
 
         source = HackernewsStories()
 
@@ -78,20 +98,16 @@ class HackernewsStoriesItemRetrieval(TestCase):
         self.assertEqual(source.backoff_time, 222)
         self.assertEqual(source.abort_after, 333)
 
+    @responses.activate
     @patch("hnac.sources.sleep")
-    @patch("hnac.sources.create_hackernews_firebase_app")
-    def test_abort_after_failing_to_retrieve_new_stories(
-            self, create_hackernews_firebase_app_mock, sleep_mock):
+    def test_abort_after_failing_to_retrieve_new_stories(self, sleep_mock):
+        responses.add(
+            responses.GET,
+            'https://hacker-news.firebaseio.com/v0/newstories.json',
+            body=RequestException(),
+            status=200
+        )
 
-        def firebase_get(url, *args):
-            if url == "/v0/newstories":
-                raise RequestException("something went wrong")
-            elif url == "/v0/item":
-                return story_1_data
-
-        instance = MagicMock()
-        create_hackernews_firebase_app_mock.return_value = instance
-        instance.get.side_effect = firebase_get
         sleep_mock.return_value = None
 
         source = HackernewsStories()
@@ -99,42 +115,30 @@ class HackernewsStoriesItemRetrieval(TestCase):
         with self.assertRaises(SourceError):
             [item for item in source.items()]
 
-        instance.get.assert_has_calls(
-            [
-                call("/v0/newstories", None),
-                call("/v0/newstories", None),
-                call("/v0/newstories", None)
-            ]
+    @responses.activate
+    @patch("hnac.sources.sleep")
+    def test_abort_after_failing_to_retrieve_story(self, sleep_mock):
+        responses.add(
+            responses.GET,
+            'https://hacker-news.firebaseio.com/v0/newstories.json',
+            json=[story_1_data["id"]],
+            status=200
         )
 
-    @patch("hnac.sources.sleep")
-    @patch("hnac.sources.create_hackernews_firebase_app")
-    def test_abort_after_failing_to_retrieve_story(
-            self, create_hackernews_firebase_app_mock, sleep_mock):
+        responses.add(
+            responses.GET,
+            f'https://hacker-news.firebaseio.com'
+            f'/v0/item/{story_1_data["id"]}.json',
+            body=RequestException(),
+            status=500
+        )
 
-        def firebase_get(url, *args):
-            if url == "/v0/newstories":
-                return [123, 456]
-            elif url == "/v0/item":
-                raise RequestException("something went wrong")
-
-        instance = MagicMock()
-        create_hackernews_firebase_app_mock.return_value = instance
-        instance.get.side_effect = firebase_get
         sleep_mock.return_value = None
 
         source = HackernewsStories()
 
         with self.assertRaises(SourceError):
             [item for item in source.items()]
-
-        instance.get.assert_has_calls(
-            [
-                call("/v0/item", 123),
-                call("/v0/item", 123),
-                call("/v0/item", 123)
-            ]
-        )
 
 
 if __name__ == "__main__":

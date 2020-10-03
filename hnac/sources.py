@@ -1,12 +1,13 @@
 from abc import ABCMeta, abstractmethod
 import logging
 from time import time, sleep
+from urllib.parse import urljoin
 
-from requests import RequestException
+from marshmallow import ValidationError
+import requests
 
 from hnac.schemas import is_story_item, HackernewsStorySchema
 from hnac.exceptions import HnacError
-from hnac.firebase import create_hackernews_firebase_app
 
 
 logger = logging.getLogger(__name__)
@@ -59,15 +60,17 @@ class Source(object):
 class HackernewsStories(Source):
     """Hackernews source"""
 
-    def __init__(self):
+    def __init__(self,
+                 hackernews_api_url="https://hacker-news.firebaseio.com"):
         super(HackernewsStories, self).__init__()
 
         self.wait_time = 1.0
         self.backoff_time = 5.0
         self.abort_after = 3
+        self.request_timeout = 5
 
         self._last_request_time = 0.0
-        self._firebase = create_hackernews_firebase_app()
+        self._hackernews_api_url = hackernews_api_url
         self._story_ids = None
 
     def configure(self, config):
@@ -90,7 +93,11 @@ class HackernewsStories(Source):
             sleep(sleep_for)
 
     def _execute_new_stories_request(self):
-        return self._firebase.get("/v0/newstories", None)
+        new_stories_url = urljoin(
+            self._hackernews_api_url, "/v0/newstories.json")
+        response = requests.get(new_stories_url, timeout=self.request_timeout)
+
+        return response.json()
 
     def _get_new_stories(self):
         failure_count = 0
@@ -98,7 +105,7 @@ class HackernewsStories(Source):
         while True:
             try:
                 return self._execute_new_stories_request()
-            except RequestException as e:
+            except requests.RequestException as e:
                 logger.exception("Failed to fetch new story ids")
 
                 failure_count += 1
@@ -116,11 +123,15 @@ class HackernewsStories(Source):
         failure_count = 0
 
         while True:
-            try:
-                self._last_request_time = time()
+            self._last_request_time = time()
+            item_url = urljoin(
+                self._hackernews_api_url, f"/v0/item/{story_id}.json")
 
-                return self._firebase.get("/v0/item", story_id)
-            except RequestException as e:
+            try:
+                response = requests.get(item_url, timeout=self.request_timeout)
+
+                return response.json()
+            except requests.RequestException as e:
                 logger.exception("Failed to fetch story %d", story_id)
 
                 failure_count += 1
@@ -145,13 +156,11 @@ class HackernewsStories(Source):
                 continue
 
             schema = HackernewsStorySchema()
-            serialization_result = schema.load(story_data)
-
-            if serialization_result.errors:
+            try:
+                story = schema.load(story_data)
+            except ValidationError as e:
                 logger.warning(
-                    "failed to deserialize story item: error(%s)",
-                    serialization_result.errors
-                )
+                    "failed to deserialize story item: error(%s)", e)
                 continue
 
-            yield serialization_result.data
+            yield story

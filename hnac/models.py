@@ -363,7 +363,7 @@ class StoryData(db.Model):
 
     @classmethod
     def create(cls, session, data, story):
-        story_data =  cls(
+        story_data = cls(
             hackernews_id=data["id"],
             story=story,
             downloaded_at=datetime.utcnow(),
