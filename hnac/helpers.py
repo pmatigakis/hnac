@@ -9,7 +9,9 @@ from dateutil.tz import tzutc
 @contextlib.contextmanager
 def open_output(filename=None):
     f_out = open(filename, "w") if filename else sys.stdout
-
+    x = 10
+    x = x
+    
     # this is a test
     if True is None:
         print("hello world"
