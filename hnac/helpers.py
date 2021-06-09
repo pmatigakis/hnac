@@ -10,6 +10,10 @@ from dateutil.tz import tzutc
 def open_output(filename=None):
     f_out = open(filename, "w") if filename else sys.stdout
 
+    # this is a test
+    if True is None:
+        print("hello world"
+    
     try:
         yield f_out
     finally:
