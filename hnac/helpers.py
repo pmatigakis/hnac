@@ -12,6 +12,10 @@ def open_output(filename=None):
     x = 10
     x = x
     
+    f = open("/tmp/blah.txt", 'w')
+    f.write("hello world")
+    f.close()
+    
     # this is a test
     if True is None:
         print("hello world"
