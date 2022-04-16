@@ -48,7 +48,7 @@ def main():
         routing_key=args.routing_key
     )
 
-    channel.basic_consume(on_message, args.queue)
+    channel.basic_consume(args.queue, on_message)
     channel.start_consuming()
 
 

@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 
 from sqlalchemy.exc import SQLAlchemyError
+from marshmallow.exceptions import ValidationError
 
 from hnac.schemas import HackernewsStorySchema
 from hnac.models import (
@@ -212,9 +213,9 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
     def _create_publisher(self, config):
         return create_publisher(
             host=config["RABBITMQ_STORY_PROCESSOR_HOST"],
-            port=config.get("RABBITMQ_STORY_PROCESSOR_PORT"),
-            username=config.get("RABBITMQ_STORY_PROCESSOR_USERNAME"),
-            password=config.get("RABBITMQ_STORY_PROCESSOR_PASSWORD"),
+            port=config["RABBITMQ_STORY_PROCESSOR_PORT"],
+            username=config["RABBITMQ_STORY_PROCESSOR_USERNAME"],
+            password=config["RABBITMQ_STORY_PROCESSOR_PASSWORD"],
             exchange=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE"],
             routing_key=config["RABBITMQ_STORY_PROCESSOR_ROUTING_KEY"],
             exchange_type=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_TYPE"],
@@ -230,18 +231,18 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
         logger.info("publishing story with id %s", item.id)
 
         schema = HackernewsStorySchema()
-        serialization_result = schema.dump(item)
-        if serialization_result.errors:
+
+        try:
+            serialized_story = schema.dump(item)
+        except ValidationError as e:
             logger.warning(
                 "failed to serialize story: errors(%s)",
-                serialization_result.errors
+                e.messages
             )
 
             raise ItemProcessingError("failed to serialize story data")
 
-        return StoryDocumentMessage(
-            story=serialization_result.data
-        )
+        return StoryDocumentMessage(story=serialized_story)
 
 
 class RabbitMQURLProcessor(RabbitMQProcessorBase):
@@ -251,9 +252,9 @@ class RabbitMQURLProcessor(RabbitMQProcessorBase):
     def _create_publisher(self, config):
         return create_publisher(
             host=config["RABBITMQ_URL_PROCESSOR_HOST"],
-            port=config.get("RABBITMQ_URL_PROCESSOR_PORT"),
-            username=config.get("RABBITMQ_URL_PROCESSOR_USERNAME"),
-            password=config.get("RABBITMQ_URL_PROCESSOR_PASSWORD"),
+            port=config["RABBITMQ_URL_PROCESSOR_PORT"],
+            username=config["RABBITMQ_URL_PROCESSOR_USERNAME"],
+            password=config["RABBITMQ_URL_PROCESSOR_PASSWORD"],
             exchange=config["RABBITMQ_URL_PROCESSOR_EXCHANGE"],
             routing_key=config["RABBITMQ_URL_PROCESSOR_ROUTING_KEY"],
             exchange_type=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_TYPE"],

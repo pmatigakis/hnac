@@ -15,6 +15,7 @@ def get_arguments():
     parser.add_argument("--exchange", default="stories")
     parser.add_argument(
         "--routing-key", default="stories.new", dest="routing_key")
+    parser.add_argument("--queue", default="story-reader")
 
     return parser.parse_args()
 
@@ -43,6 +44,7 @@ def main():
     connection = BlockingConnection(parameters)
     channel = connection.channel()
     response = channel.queue_declare(
+        queue=args.queue,
         exclusive=True,
         auto_delete=True
     )
@@ -54,7 +56,7 @@ def main():
         routing_key=args.routing_key
     )
 
-    channel.basic_consume(on_message, queue)
+    channel.basic_consume(queue, on_message)
 
     try:
         channel.start_consuming()
