@@ -1,17 +1,16 @@
 from argparse import ArgumentParser
 import json
 
-from pika import BlockingConnection, ConnectionParameters
-from pika.credentials import PlainCredentials
+from pika import BlockingConnection, URLParameters
 
 
 def get_arguments():
     parser = ArgumentParser()
 
-    parser.add_argument("--host", default="localhost")
-    parser.add_argument("--port", default=5672, type=int)
-    parser.add_argument("--username", default="guest")
-    parser.add_argument("--password", default="guest")
+    parser.add_argument(
+        "--parameters-url",
+        default="amqp://guest:guest@localhost:5672/%2F"
+    )
     parser.add_argument("--exchange", default="urls")
     parser.add_argument(
         "--routing-key", default="urls.new", dest="routing_key")
@@ -29,16 +28,7 @@ def on_message(channel, method_frame, header_frame, body):
 def main():
     args = get_arguments()
 
-    credentials = None
-    if args.username and args.password:
-        credentials = PlainCredentials(args.username, args.password)
-
-    parameters = ConnectionParameters(
-        host=args.host,
-        port=args.port,
-        credentials=credentials
-    )
-
+    parameters = URLParameters(args.parameters_url)
     connection = BlockingConnection(parameters)
     channel = connection.channel()
     response = channel.queue_declare(

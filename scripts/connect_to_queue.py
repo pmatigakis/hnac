@@ -6,13 +6,13 @@ import pika
 def get_arguments():
     parser = ArgumentParser()
 
-    parser.add_argument("--username")
-    parser.add_argument("--password")
+    parser.add_argument(
+        "--parameters-url",
+        default="amqp://guest:guest@localhost:5672/%2F"
+    )
     parser.add_argument("--exchange", required=True)
     parser.add_argument("--queue", required=True)
     parser.add_argument("--routing-key", required=True, dest="routing_key")
-    parser.add_argument("--host", default="localhost")
-    parser.add_argument("--port", default=5672)
 
     return parser.parse_args()
 
@@ -25,16 +25,7 @@ def on_message(channel, basic_deliver, properties, body):
 def main():
     args = get_arguments()
 
-    credentials = None
-    if args.username and args.password:
-        credentials = pika.PlainCredentials(args.username, args.password)
-
-    connection_parameters = pika.ConnectionParameters(
-        host=args.host,
-        port=args.port,
-        credentials=credentials
-    )
-
+    connection_parameters = pika.URLParameters(args.parameters_url)
     connection = pika.BlockingConnection(connection_parameters)
     channel = connection.channel()
     channel.queue_declare(

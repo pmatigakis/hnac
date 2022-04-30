@@ -212,10 +212,7 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
 
     def _create_publisher(self, config):
         return create_publisher(
-            host=config["RABBITMQ_STORY_PROCESSOR_HOST"],
-            port=config["RABBITMQ_STORY_PROCESSOR_PORT"],
-            username=config["RABBITMQ_STORY_PROCESSOR_USERNAME"],
-            password=config["RABBITMQ_STORY_PROCESSOR_PASSWORD"],
+            parameters_url=config["RABBITMQ_STORY_PROCESSOR"],
             exchange=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE"],
             routing_key=config["RABBITMQ_STORY_PROCESSOR_ROUTING_KEY"],
             exchange_type=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_TYPE"],
@@ -251,10 +248,7 @@ class RabbitMQURLProcessor(RabbitMQProcessorBase):
 
     def _create_publisher(self, config):
         return create_publisher(
-            host=config["RABBITMQ_URL_PROCESSOR_HOST"],
-            port=config["RABBITMQ_URL_PROCESSOR_PORT"],
-            username=config["RABBITMQ_URL_PROCESSOR_USERNAME"],
-            password=config["RABBITMQ_URL_PROCESSOR_PASSWORD"],
+            parameters_url=config["RABBITMQ_URL_PROCESSOR"],
             exchange=config["RABBITMQ_URL_PROCESSOR_EXCHANGE"],
             routing_key=config["RABBITMQ_URL_PROCESSOR_ROUTING_KEY"],
             exchange_type=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_TYPE"],

@@ -1,7 +1,6 @@
 import logging
 
 import pika
-from pika.credentials import PlainCredentials
 
 from hnac.channels import MessageChannel
 
@@ -9,16 +8,10 @@ from hnac.channels import MessageChannel
 logger = logging.getLogger(__name__)
 
 
-def create_publisher(host, port, username, password, exchange, exchange_type,
+def create_publisher(parameters_url, exchange, exchange_type,
                      durable, auto_delete, routing_key):
-    credentials = None
-    if username and password:
-        credentials = PlainCredentials(username, password)
-
     return RabbitMQPublisher(
-        host=host,
-        port=port,
-        credentials=credentials,
+        parameters_url=parameters_url,
         exchange=exchange,
         routing_key=routing_key,
         exchange_type=exchange_type,
@@ -28,14 +21,11 @@ def create_publisher(host, port, username, password, exchange, exchange_type,
 
 
 class RabbitMQPublisher(object):
-    def __init__(self, host, port, credentials, exchange, exchange_type,
+    def __init__(self, parameters_url, exchange, exchange_type,
                  durable, auto_delete, routing_key):
         """Create a new RabbitMQPublisher object
 
-        :param str host: the RabbitMQ host
-        :param int port: the port on which RabbitMQ listens
-        :param PlainCredentials credentials: the credentials to use in order to
-        connect to RabbitMQ
+        :param str parameters_url: the RabbitMQ parameters url
         :param str exchange: the exchange to publish the stories
         :param str exchange_type: the exchange type
         :param boolean durable: is the exchange durable
@@ -48,11 +38,7 @@ class RabbitMQPublisher(object):
         self._durable = durable
         self._auto_delete = auto_delete
 
-        self._connection_parameters = pika.ConnectionParameters(
-            host=host,
-            port=port,
-            credentials=credentials
-        )
+        self._connection_parameters = pika.URLParameters(parameters_url)
 
         self._connection = None
         self._channel = None
