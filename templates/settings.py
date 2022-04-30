@@ -3,26 +3,16 @@ DEBUG = False
 SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://$username:$password@localhost:5432/$db"
 
 # settings for the RabbitMQ story processor
-# RABBITMQ_STORY_PROCESSOR_HOST = "localhost"
+# RABBITMQ_STORY_PROCESSOR = "amqp://guest:guest@localhost:5672/%2F"
 # RABBITMQ_STORY_PROCESSOR_EXCHANGE = "hackernews"
-# RABBITMQ_STORY_PROCESSOR_ROUTING_KEY = "stories"
-# RABBITMQ_STORY_PROCESSOR_USERNAME = "guest"
-# RABBITMQ_STORY_PROCESSOR_PASSWORD = "guest"
-
-# settings for the RabbitMQ url processor
-# RABBITMQ_URL_PROCESSOR_HOST = "localhost"
-# RABBITMQ_URL_PROCESSOR_EXCHANGE = "hackernews"
-# RABBITMQ_URL_PROCESSOR_ROUTING_KEY = "urls"
-# RABBITMQ_URL_PROCESSOR_USERNAME = "guest"
-# RABBITMQ_URL_PROCESSOR_PASSWORD = "guest"
-
+# RABBITMQ_STORY_PROCESSOR_EXCHANGE_TYPE = "topic"
+# RABBITMQ_STORY_PROCESSOR_EXCHANGE_DURABLE = True
+# RABBITMQ_STORY_PROCESSOR_EXCHANGE_AUTO_DELETE = False
+# RABBITMQ_STORY_PROCESSOR_ROUTING_KEY = "stories.new"
 
 PROCESSORS = [
     # uncomment the following line to enable the RabbitMQ story processor
-    # "hnac.processors.RabbitMQStoryProcessor",
-
-    # uncomment the following line to enable the RabbitMQ url processor
-    # "hnac.processors.RabbitMQURLProcessor"
+    # "hnac.processors.RabbitMQProcessor",
 ]
 
 LOGGING = {

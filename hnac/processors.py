@@ -11,7 +11,7 @@ from hnac.models import (
 )
 from hnac.queues import create_publisher
 from hnac.exceptions import ItemProcessingError
-from hnac.messages import StoryDocumentMessage, UrlDocumentMessage
+from hnac.messages import StoryDocumentMessage
 
 
 logger = logging.getLogger(__name__)
@@ -141,11 +141,8 @@ class SQLAlchemyStorage(Processor):
             raise ItemProcessingError("failed to save story to database")
 
 
-class RabbitMQProcessorBase(Processor):
-    """Base class for processor that use RabbitMQ"""
-
-    __metaclass__ = ABCMeta
-
+class RabbitMQProcessor(Processor):
+    """Processor that publishes the hackernews stories to a RabbitMQ server"""
     def __init__(self):
         self._publisher = None
 
@@ -175,40 +172,6 @@ class RabbitMQProcessorBase(Processor):
             self._publisher.close()
         except Exception:
             logger.exception("failed to disconnect from RabbitMQ")
-
-    @abstractmethod
-    def _create_publisher(self, config):
-        """Create the publisher object that this processor will use
-
-        :param dict config: the configuration settings
-        :rtype: RabbitMQPublisher
-        :return: the publisher that this processor will use
-        """
-        pass
-
-    @abstractmethod
-    def _create_message(self, item):
-        """Create a message to be transmitted using data from the hackernews
-        item
-
-        :param object item: the hackernews item
-        :rtype: MessageBase
-        :return: the message to transmit
-        """
-        pass
-
-    def process_item(self, source, item):
-        """Process the given item
-
-        :param Source source: the source that returned this item
-        :param object item: the hackernews item to process
-        """
-        message = self._create_message(item)
-        self._publisher.publish_message(message)
-
-
-class RabbitMQStoryProcessor(RabbitMQProcessorBase):
-    """Processor that published the hackernews stories to a RabbitMQ server"""
 
     def _create_publisher(self, config):
         return create_publisher(
@@ -241,31 +204,14 @@ class RabbitMQStoryProcessor(RabbitMQProcessorBase):
 
         return StoryDocumentMessage(story=serialized_story)
 
+    def process_item(self, source, item):
+        """Process the given item
 
-class RabbitMQURLProcessor(RabbitMQProcessorBase):
-    """Processor that published the urls of hackernews stories to a RabbitMQ
-    server"""
-
-    def _create_publisher(self, config):
-        return create_publisher(
-            parameters_url=config["RABBITMQ_URL_PROCESSOR"],
-            exchange=config["RABBITMQ_URL_PROCESSOR_EXCHANGE"],
-            routing_key=config["RABBITMQ_URL_PROCESSOR_ROUTING_KEY"],
-            exchange_type=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_TYPE"],
-            durable=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_DURABLE"],
-            auto_delete=config["RABBITMQ_URL_PROCESSOR_EXCHANGE_AUTO_DELETE"]
-        )
-
-    def _create_message(self, item):
-        if not isinstance(item, HackernewsStoryItem):
-            logger.info("item is not a story object")
-            return
-
-        if item.url is None:
-            logger.info("story with id %s doesn't contain a url", item.id)
-            raise ItemProcessingError("story doesn't contain a url")
-
-        return UrlDocumentMessage(item.url)
+        :param Source source: the source that returned this item
+        :param object item: the hackernews item to process
+        """
+        message = self._create_message(item)
+        self._publisher.publish_message(message)
 
 
 class Processors(object):
