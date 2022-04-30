@@ -3,12 +3,12 @@ DEBUG = False
 SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://$username:$password@localhost:5432/$db"
 
 # settings for the RabbitMQ story processor
-# RABBITMQ_STORY_PROCESSOR = "amqp://guest:guest@localhost:5672/%2F"
-# RABBITMQ_STORY_PROCESSOR_EXCHANGE = "hackernews"
-# RABBITMQ_STORY_PROCESSOR_EXCHANGE_TYPE = "topic"
-# RABBITMQ_STORY_PROCESSOR_EXCHANGE_DURABLE = True
-# RABBITMQ_STORY_PROCESSOR_EXCHANGE_AUTO_DELETE = False
-# RABBITMQ_STORY_PROCESSOR_ROUTING_KEY = "stories.new"
+# RABBITMQ_PROCESSOR = "amqp://guest:guest@localhost:5672/%2F"
+# RABBITMQ_PROCESSOR_EXCHANGE = "hackernews"
+# RABBITMQ_PROCESSOR_EXCHANGE_TYPE = "topic"
+# RABBITMQ_PROCESSOR_EXCHANGE_DURABLE = True
+# RABBITMQ_PROCESSOR_EXCHANGE_AUTO_DELETE = False
+# RABBITMQ_PROCESSOR_ROUTING_KEY = "stories.new"
 
 PROCESSORS = [
     # uncomment the following line to enable the RabbitMQ story processor

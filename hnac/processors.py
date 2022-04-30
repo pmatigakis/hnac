@@ -175,12 +175,12 @@ class RabbitMQProcessor(Processor):
 
     def _create_publisher(self, config):
         return create_publisher(
-            parameters_url=config["RABBITMQ_STORY_PROCESSOR"],
-            exchange=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE"],
-            routing_key=config["RABBITMQ_STORY_PROCESSOR_ROUTING_KEY"],
-            exchange_type=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_TYPE"],
-            durable=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_DURABLE"],
-            auto_delete=config["RABBITMQ_STORY_PROCESSOR_EXCHANGE_AUTO_DELETE"]
+            parameters_url=config["RABBITMQ_PROCESSOR"],
+            exchange=config["RABBITMQ_PROCESSOR_EXCHANGE"],
+            routing_key=config["RABBITMQ_PROCESSOR_ROUTING_KEY"],
+            exchange_type=config["RABBITMQ_PROCESSOR_EXCHANGE_TYPE"],
+            durable=config["RABBITMQ_PROCESSOR_EXCHANGE_DURABLE"],
+            auto_delete=config["RABBITMQ_PROCESSOR_EXCHANGE_AUTO_DELETE"]
         )
 
     def _create_message(self, item):
