@@ -20,11 +20,12 @@ Install the package
 Usage
 =====
 
-Create the configuration file *settings.py* and set the variables for the Postgresql
-database.
+Create the configuration file *.env* and set the variables for the Postgresql
+database as well as a secret key.
 
-```python
-SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://username:password@localhost:5432/hnac"
+```bash
+SECRET="put-a-secret-key-here"
+SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://username:password@localhost:5432/hnac"
 ```
 
 Edit the alembic.ini file and set the *sqlalchemy.url* variable to point to your
