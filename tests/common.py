@@ -1,7 +1,9 @@
+import importlib
 from datetime import datetime, timedelta
 from os.path import abspath, dirname, join
 from unittest import TestCase
 import json
+from os import environ
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -13,8 +15,11 @@ from hnac.web.database import db
 
 class ModelTestCase(TestCase):
     def setUp(self):
-        settings_path = join(dirname(abspath(__file__)), "settings.py")
-        self.app = create_app("testing", settings_path)
+        settings_path = join(dirname(abspath(__file__)), "test_env")
+        environ["CONFIGURATION_FILE"] = settings_path
+        import hnac.configuration.settings
+        importlib.reload(hnac.configuration.settings)
+        self.app = create_app()
 
         with self.app.app_context():
             db.create_all()
@@ -75,8 +80,11 @@ class ModelTestCaseWithMockData(ModelTestCase):
 
 class WebTestCase(TestCase):
     def setUp(self):
-        settings_path = join(dirname(abspath(__file__)), "settings.py")
-        self.app = create_app("testing", settings_path)
+        settings_path = join(dirname(abspath(__file__)), "test_env")
+        environ["CONFIGURATION_FILE"] = settings_path
+        import hnac.configuration.settings
+        importlib.reload(hnac.configuration.settings)
+        self.app = create_app()
 
         with self.app.app_context():
             db.create_all()

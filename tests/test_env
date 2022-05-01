@@ -1,0 +1,4 @@
+SECRET=testing
+SQLALCHEMY_DATABASE_URI="sqlite://"
+TESTING=True
+DEBUG=False

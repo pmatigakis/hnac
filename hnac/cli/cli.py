@@ -1,6 +1,3 @@
-import os
-from os import path
-
 from flask_script import Manager
 
 from hnac.web.app import create_app
@@ -14,18 +11,7 @@ from hnac.cli.commands.stories import DumpStories
 
 
 def main():
-    configuration_file_path = path.abspath("settings.py")
-
-    if not path.exists(configuration_file_path):
-        print("File settings.py doesn't exist")
-        exit(1)
-    elif not path.isfile(configuration_file_path):
-        print("settings.py is not a file")
-        exit(1)
-
-    environment = os.environ.get("ENVIRONMENT", "production")
-
-    app = create_app(environment, configuration_file_path)
+    app = create_app()
 
     manager = Manager(app)
 

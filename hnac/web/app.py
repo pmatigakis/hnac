@@ -13,20 +13,9 @@ from hnac.web.admin import (ReportModelView, UserModelView,
 from hnac.logging import configure_logging
 
 
-def create_app(environment="production", settings_module=None):
+def create_app():
     app = Flask(__name__)
-
-    configuration_modules = {
-        "production": "hnac.configuration.production",
-        "development": "hnac.configuration.development",
-        "testing": "hnac.configuration.testing"
-    }
-
-    app.config.from_object("hnac.configuration.default")
-    app.config.from_object(configuration_modules[environment])
-
-    if settings_module:
-        app.config.from_pyfile(settings_module)
+    app.config.from_object("hnac.configuration.settings")
 
     configure_logging(app.config)
 
